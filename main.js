@@ -4,6 +4,7 @@
 let turn;
 let winner;
 
+// playerGuesses compares to computerBoard
 // 0: no ship, 1: ship
 let playerBoard;
 let computerBoard;
@@ -22,7 +23,7 @@ const playerCellEls = [...playerBoardEl.querySelectorAll('.cell')];
 const computerCellEls = [...computerBoardEl.querySelectorAll('.cell')];
 
 /*--- event listeners ---*/
-
+computerBoardEl.addEventListener('click', onGuess);
 
 /*--- main ---*/
 init();
@@ -59,7 +60,7 @@ function init() {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
-    
+
     // 0: not guessed, 1: hit, -1: miss
     playerGuesses = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -73,7 +74,7 @@ function init() {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
-    
+
     // 0: not guessed, 1: hit, -1: miss
     computerGuesses = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -87,7 +88,7 @@ function init() {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
-    
+
     playerShips = [
         {
             name: 'carrier',
@@ -130,7 +131,7 @@ function init() {
             isVertical: false,
         }
     ]
-    
+
     computerShips = [
         {
             name: 'carrier',
@@ -179,14 +180,38 @@ function init() {
 
     render();
 }
+function extractCoords(cell) {
+    // takes cell div element, returns coordinates of that cell in the board as arr ['c', 0, 1] or ['p', 0, 1]
+    return cell.id.split('-');
+}
 
 // taking turn
 function onGuess(evt) {
     // get cell clicked
+    const target = evt.target
 
-    // check if legal cell
+    // check if actual cell
+    if (!(target.classList.contains('cell'))) return;
+
+    // get cell coords ['p?t', 0, 0] 
+    const coords = extractCoords(target);
+    const [cellBoard, cellRow, cellCol] = [...coords];
+    console.log(cellBoard, cellRow, cellCol);
+    // check legal cell (in guesses object not classes)
+    if (cellBoard === 'p') {
+        if (computerGuesses[cellRow][cellCol]) {
+            // cell has already been guessed
+            return;
+        };
+    } else {
+        if (playerGuesses[cellRow][cellCol]) {
+            // cell has already been guessed
+            return;
+        }
+    };
 
     // check if hit or miss, isHit = getHitOrMiss()
+    isHit = getHitOrMiss(coords);
 
     // if hit, handleHit()
 
@@ -197,6 +222,14 @@ function onGuess(evt) {
 
 function getHitOrMiss(cell) {
     // take cell, return true for hit, false for miss
+
+    const [board, row, col] = [...cell];
+
+    if (board === 'p') {
+        console.log(playerBoard);
+    } else {
+        console.log(computerBoard);
+    }
 }
 
 function handleHit(cell) {
@@ -208,7 +241,11 @@ function handleHit(cell) {
 
     // renderCell(cell, 'hit')
 
-    // check if ship now sunk
+    // check if ship now sunk, isSunk = checkShipSunk()
+
+    // if player is hit, renderScoreboardHit()
+
+    // if ship sinks, renderScoreboardSunk()
 
     // if ship sinks, checkWinner()
 
@@ -216,9 +253,13 @@ function handleHit(cell) {
 
 function handleMiss(cell) {
     // update playerGuesses or computerGuesses
-    
+
     // renderCell(cell, 'miss')
 
+}
+
+function checkShipSunk(cell) {
+    // takes cell, returns ship object or null
 }
 
 function checkWinner() {
