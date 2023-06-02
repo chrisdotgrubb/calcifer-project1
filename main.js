@@ -16,7 +16,10 @@ let playerShips;
 let computerShips;
 
 /*--- cached elements ---*/
-
+const playerBoardEl = document.querySelector('#playerBoard');
+const computerBoardEl = document.querySelector('#computerBoard');
+const playerCellEls = [...playerBoardEl.querySelectorAll('.cell')];
+const computerCellEls = [...computerBoardEl.querySelectorAll('.cell')];
 
 /*--- event listeners ---*/
 
@@ -25,6 +28,8 @@ let computerShips;
 init();
 
 /*--- functions ---*/
+
+// start/restart game
 function init() {
     turn = -1;
     winner = null;
@@ -168,5 +173,81 @@ function init() {
             isVertical: false,
         }
     ]
+    // if using as both initial setup and reset game, need a few extras. fix this by creating seperate playAgain function
+    // will need to hide play again button
+    // need to clear classes from all cells, and scoreboard
+
+    render();
 }
 
+// taking turn
+function onGuess(evt) {
+    // get cell clicked
+
+    // check if legal cell
+
+    // check if hit or miss, isHit = getHitOrMiss()
+
+    // if hit, handleHit()
+
+    // else, handleMiss()
+
+    // if not winner: change turns
+}
+
+function getHitOrMiss(cell) {
+    // take cell, return true for hit, false for miss
+}
+
+function handleHit(cell) {
+    // update playerGuesses or computerGuesses
+
+    // get ship that was hit
+
+    // update playerShips or computerShips
+
+    // renderCell(cell, 'hit')
+
+    // check if ship now sunk
+
+    // if ship sinks, checkWinner()
+
+}
+
+function handleMiss(cell) {
+    // update playerGuesses or computerGuesses
+    
+    // renderCell(cell, 'miss')
+
+}
+
+function checkWinner() {
+    // checks if all ships of a player are destroyed
+
+    // returns 1 or -1 for winner, else null
+}
+
+// rendering
+function render() {
+    // for each cell, renderCell();
+
+    // render scoreboard
+
+    // render winner?
+}
+
+function renderCell(cell, change) {
+    // change classes on cell
+}
+
+function renderScoreboard() {
+    // show hits/sunk ships below the board
+}
+
+function renderWinner() {
+    // show winner/loser message
+
+    // reveal computer ships
+
+    // display play again button
+}
