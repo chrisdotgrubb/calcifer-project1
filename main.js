@@ -49,7 +49,7 @@ function init() {
     ];
 
     computerBoard = [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -197,7 +197,8 @@ function onGuess(evt) {
     const coords = extractCoords(target);
     const [cellBoard, cellRow, cellCol] = [...coords];
     console.log(cellBoard, cellRow, cellCol);
-    // check legal cell (in guesses object not classes)
+
+    // check legal guess (in guesses object not classes)
     if (cellBoard === 'p') {
         if (computerGuesses[cellRow][cellCol]) {
             // cell has already been guessed
@@ -211,30 +212,30 @@ function onGuess(evt) {
     };
 
     // check if hit or miss, isHit = getHitOrMiss()
-    isHit = getHitOrMiss(coords);
+    let isHit = getHitOrMiss(coords);
 
-    // if hit, handleHit()
-
-    // else, handleMiss()
+    // handle hit or miss
+    isHit? handleHit(): handleMiss();
 
     // if not winner: change turns
+    if (!winner) turn *= -1;
 }
 
 function getHitOrMiss(cell) {
-    // take cell, return true for hit, false for miss
+    // take cell, returns 1 for hit, 0 for miss
 
     const [board, row, col] = [...cell];
 
     if (board === 'p') {
-        console.log(playerBoard);
+        return playerBoard[row][col];
     } else {
-        console.log(computerBoard);
+        return computerBoard[row][col];
     }
 }
 
 function handleHit(cell) {
     // update playerGuesses or computerGuesses
-
+    console.log('hit');
     // get ship that was hit
 
     // update playerShips or computerShips
@@ -253,7 +254,7 @@ function handleHit(cell) {
 
 function handleMiss(cell) {
     // update playerGuesses or computerGuesses
-
+    console.log('miss');
     // renderCell(cell, 'miss')
 
 }
