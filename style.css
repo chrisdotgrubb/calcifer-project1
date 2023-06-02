@@ -20,6 +20,7 @@ main {
 .marker {
     text-align: center;
 }
+
 .cell {
     border: 1px solid black;
 }
@@ -30,8 +31,3 @@ main {
     grid-template-rows: repeat(11, 5vmin);
     margin: 5vmin;
 }
-
-#p-0 {
-    border: none;
-}
-
