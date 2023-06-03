@@ -136,7 +136,7 @@ function init() {
         {
             name: 'carrier',
             size: 5,
-            coords: [],
+            coords: [[0,0], [0,1], [0,2], [0,3], [0,4]],
             hits: [false, false, false, false, false],
             isSunk: false,
             isVertical: false,
@@ -180,9 +180,9 @@ function init() {
 
     render();
 }
-function extractCoords(cell) {
+function extractCoords(cellEl) {
     // takes cell div element, returns coordinates of that cell in the board as arr ['c', 0, 1] or ['p', 0, 1]
-    return cell.id.split('-');
+    return cellEl.id.split('-');
 }
 
 // taking turn
@@ -196,7 +196,6 @@ function onGuess(evt) {
     // get cell coords ['p?t', 0, 0] 
     const coords = extractCoords(target);
     const [cellBoard, cellRow, cellCol] = [...coords];
-    console.log(cellBoard, cellRow, cellCol);
 
     // check legal guess (in guesses object not classes)
     if (cellBoard === 'p') {
@@ -215,16 +214,16 @@ function onGuess(evt) {
     let isHit = getHitOrMiss(coords);
 
     // handle hit or miss
-    isHit? handleHit(): handleMiss();
+    isHit? handleHit(coords): handleMiss(coords);
 
     // if not winner: change turns
     if (!winner) turn *= -1;
 }
 
-function getHitOrMiss(cell) {
+function getHitOrMiss(coords) {
     // take cell, returns 1 for hit, 0 for miss
 
-    const [board, row, col] = [...cell];
+    const [board, row, col] = [...coords];
 
     if (board === 'p') {
         return playerBoard[row][col];
@@ -233,12 +232,28 @@ function getHitOrMiss(cell) {
     }
 }
 
-function handleHit(cell) {
-    // update playerGuesses or computerGuesses
-    console.log('hit');
-    // get ship that was hit
+// takes coordinate ['p', 0, 0] returns ship and index of location hit
+function getShipAtCoord(coords) {
+    const [board, row, col] = [...coords];
+    ships = (board === 'p')? playerShips: computerShips;
+    for (let ship of ships) {
+        for (let i=0; i < ship.size; i++) {
+            if (ship.coords[i][0] == row && ship.coords[i][1] == col) {
+                return [ship, i]
+            }
+        }
+    }
+}
 
-    // update playerShips or computerShips
+function handleHit(coords) {
+    // update playerGuesses or computerGuesses
+    console.log('hit', coords);
+    // get ship that was hit
+    const [ship, idx] = getShipAtCoord(coords);
+    console.log(ship, idx);
+
+    // update ship hit to true
+    ship.hits[idx] = true;
 
     // renderCell(cell, 'hit')
 
