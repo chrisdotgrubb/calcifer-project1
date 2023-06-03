@@ -49,7 +49,7 @@ function init() {
     ];
 
     computerBoard = [
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -137,7 +137,7 @@ function init() {
             name: 'carrier',
             size: 5,
             coords: [[0,0], [0,1], [0,2], [0,3], [0,4]],
-            hits: [false, false, false, false, false],
+            hits: [true, true, true, true, true],
             isSunk: false,
             isVertical: false,
         },
@@ -217,7 +217,11 @@ function onGuess(evt) {
     isHit? handleHit(coords): handleMiss(coords);
 
     // if not winner: change turns
-    if (!winner) turn *= -1;
+    if (winner){
+        renderWinner();
+    } else {
+        turn *= -1;
+    };
 }
 
 function getHitOrMiss(coords) {
@@ -229,7 +233,7 @@ function getHitOrMiss(coords) {
         return playerBoard[row][col];
     } else {
         return computerBoard[row][col];
-    }
+    };
 }
 
 // takes coordinate ['p', 0, 0] returns ship and index of location hit
@@ -247,41 +251,65 @@ function getShipAtCoord(coords) {
 
 function handleHit(coords) {
     // update playerGuesses or computerGuesses
-    console.log('hit', coords);
+    const [board, row, col] = [...coords];
+    if (board === 'p') {
+        computerGuesses[row][col] = 1;
+    } else {
+        playerGuesses[row][col] = 1;
+    };
     // get ship that was hit
     const [ship, idx] = getShipAtCoord(coords);
-    console.log(ship, idx);
 
     // update ship hit to true
     ship.hits[idx] = true;
 
-    // renderCell(cell, 'hit')
+    renderCell(cell, 'hit')
 
-    // check if ship now sunk, isSunk = checkShipSunk()
+    // check if ship now sunk
+    ship.isSunk = ship.hits.every(hit => hit === true);
 
     // if player is hit, renderScoreboardHit()
 
     // if ship sinks, renderScoreboardSunk()
 
-    // if ship sinks, checkWinner()
-
+    // if ship sinks, checkWinner(), then set winner to current turn or null
+    if (ship.isSunk) {
+        winner = checkWinner(coords)? turn: null;
+    };
 }
 
-function handleMiss(cell) {
+function handleMiss(coords) {
     // update playerGuesses or computerGuesses
-    console.log('miss');
-    // renderCell(cell, 'miss')
+    const [board, row, col] = [...coords];
+    if (board === 'p') {
+        computerGuesses[row][col] = -1;
+    } else {
+        playerGuesses[row][col] = -1;
+    };
+
+    renderCell(cell, 'miss')
 
 }
 
-function checkShipSunk(cell) {
-    // takes cell, returns ship object or null
-}
-
-function checkWinner() {
+function checkWinner(cell) {
     // checks if all ships of a player are destroyed
+    const [board, row, col] = [...cell];
 
     // returns 1 or -1 for winner, else null
+    if (board === 'p') {
+        for (ship of playerShips){
+            if (!ship.isSunk){
+                return false;
+            }
+        }
+    } else {
+        for (ship of computerShips) {
+            if (!ship.isSunk){
+                return false;
+            }
+        }
+    };
+    return true;
 }
 
 // rendering
@@ -290,20 +318,25 @@ function render() {
 
     // render scoreboard
 
-    // render winner?
 }
 
 function renderCell(cell, change) {
     // change classes on cell
+    if (change === 'hit'){
+        console.log('render hit now');
+    } else {
+        console.log('render miss now');
+    }
 }
 
 function renderScoreboard() {
     // show hits/sunk ships below the board
+    console.log('update scoreboard now');
 }
 
 function renderWinner() {
     // show winner/loser message
-
+    console.log('winner is ', turn);
     // reveal computer ships
 
     // display play again button
