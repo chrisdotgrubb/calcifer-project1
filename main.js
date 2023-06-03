@@ -49,7 +49,7 @@ function init() {
     ];
 
     computerBoard = [
-        [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -93,7 +93,7 @@ function init() {
         {
             name: 'carrier',
             size: 5,
-            coords: [],
+            coords: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
             hits: [false, false, false, false, false],
             isSunk: false,
             isVertical: false,
@@ -101,7 +101,7 @@ function init() {
         {
             name: 'battleship',
             size: 4,
-            coords: [],
+            coords: [[1, 0], [1, 1], [1, 2], [1, 3]],
             hits: [false, false, false, false],
             isSunk: false,
             isVertical: false,
@@ -109,7 +109,7 @@ function init() {
         {
             name: 'cruiser',
             size: 3,
-            coords: [],
+            coords: [[2, 0], [2, 1], [2, 2]],
             hits: [false, false, false],
             isSunk: false,
             isVertical: false,
@@ -117,7 +117,7 @@ function init() {
         {
             name: 'submarine',
             size: 3,
-            coords: [],
+            coords: [[3, 0], [3, 1], [3, 2]],
             hits: [false, false, false],
             isSunk: false,
             isVertical: false,
@@ -125,7 +125,7 @@ function init() {
         {
             name: 'destroyer',
             size: 2,
-            coords: [],
+            coords: [[4, 0], [4, 1]],
             hits: [false, false],
             isSunk: false,
             isVertical: false,
@@ -136,15 +136,15 @@ function init() {
         {
             name: 'carrier',
             size: 5,
-            coords: [[0,0], [0,1], [0,2], [0,3], [0,4]],
-            hits: [true, true, true, true, true],
+            coords: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
+            hits: [false, false, false, false, false],
             isSunk: false,
             isVertical: false,
         },
         {
             name: 'battleship',
             size: 4,
-            coords: [],
+            coords: [[1, 0], [1, 1], [1, 2], [1, 3]],
             hits: [false, false, false, false],
             isSunk: false,
             isVertical: false,
@@ -152,7 +152,7 @@ function init() {
         {
             name: 'cruiser',
             size: 3,
-            coords: [],
+            coords: [[2, 0], [2, 1], [2, 2]],
             hits: [false, false, false],
             isSunk: false,
             isVertical: false,
@@ -160,7 +160,7 @@ function init() {
         {
             name: 'submarine',
             size: 3,
-            coords: [],
+            coords: [[3, 0], [3, 1], [3, 2]],
             hits: [false, false, false],
             isSunk: false,
             isVertical: false,
@@ -168,7 +168,7 @@ function init() {
         {
             name: 'destroyer',
             size: 2,
-            coords: [],
+            coords: [[4, 0], [4, 1]],
             hits: [false, false],
             isSunk: false,
             isVertical: false,
@@ -178,8 +178,32 @@ function init() {
     // will need to hide play again button
     // need to clear classes from all cells, and scoreboard
 
+    // place player ships into playerBoard for right now, should move to after ship placements are picked
+    placeShipsOntoBoard();
+
+    // render player's ships, done per ship so later allowing for single placement
+    playerShips.forEach(ship => {
+        renderShip(ship, 'p');
+    })
+
+    // currently doing nothing, may eliminate since each action triggers different renders
     render();
 }
+
+function placeShipsOntoBoard() {
+    for (let ship of playerShips) {
+        for (let coord of ship.coords) {
+            playerBoard[coord[0]][coord[1]] = 1;
+        }
+    };
+
+    for (let ship of computerShips) {
+        for (let coord of ship.coords) {
+            computerBoard[coord[0]][coord[1]] = 1;
+        }
+    };
+}
+
 function extractCoords(cellEl) {
     // takes cell div element, returns coordinates of that cell in the board as arr ['c', 0, 1] or ['p', 0, 1]
     return cellEl.id.split('-');
@@ -214,10 +238,10 @@ function onGuess(evt) {
     let isHit = getHitOrMiss(coords);
 
     // handle hit or miss
-    isHit? handleHit(coords): handleMiss(coords);
+    isHit ? handleHit(coords) : handleMiss(coords);
 
     // if not winner: change turns
-    if (winner){
+    if (winner) {
         renderWinner();
     } else {
         turn *= -1;
@@ -239,9 +263,9 @@ function getHitOrMiss(coords) {
 // takes coordinate ['p', 0, 0] returns ship and index of location hit
 function getShipAtCoord(coords) {
     const [board, row, col] = [...coords];
-    ships = (board === 'p')? playerShips: computerShips;
+    ships = (board === 'p') ? playerShips : computerShips;
     for (let ship of ships) {
-        for (let i=0; i < ship.size; i++) {
+        for (let i = 0; i < ship.size; i++) {
             if (ship.coords[i][0] == row && ship.coords[i][1] == col) {
                 return [ship, i]
             }
@@ -263,7 +287,7 @@ function handleHit(coords) {
     // update ship hit to true
     ship.hits[idx] = true;
 
-    renderCell(cell, 'hit')
+    renderCell(coords, 'hit');
 
     // check if ship now sunk
     ship.isSunk = ship.hits.every(hit => hit === true);
@@ -274,7 +298,7 @@ function handleHit(coords) {
 
     // if ship sinks, checkWinner(), then set winner to current turn or null
     if (ship.isSunk) {
-        winner = checkWinner(coords)? turn: null;
+        winner = checkWinner(coords) ? turn : null;
     };
 }
 
@@ -287,7 +311,7 @@ function handleMiss(coords) {
         playerGuesses[row][col] = -1;
     };
 
-    renderCell(cell, 'miss')
+    renderCell(coords, 'miss');
 
 }
 
@@ -297,14 +321,14 @@ function checkWinner(cell) {
 
     // returns 1 or -1 for winner, else null
     if (board === 'p') {
-        for (ship of playerShips){
-            if (!ship.isSunk){
+        for (ship of playerShips) {
+            if (!ship.isSunk) {
                 return false;
             }
         }
     } else {
         for (ship of computerShips) {
-            if (!ship.isSunk){
+            if (!ship.isSunk) {
                 return false;
             }
         }
@@ -322,10 +346,20 @@ function render() {
 
 function renderCell(cell, change) {
     // change classes on cell
-    if (change === 'hit'){
+    if (change === 'hit') {
         console.log('render hit now');
-    } else {
+    } else if (change === 'miss') {
         console.log('render miss now');
+    } else if (change === 'ship') {
+        console.log('render ship now');
+    }
+}
+
+function renderShip(ship, player) {
+    let cellEls = (player === 'p') ? playerCellEls : computerCellEls;
+    for (let coord of ship.coords) {
+        let i = coord[0] * 10 + coord[1]
+        cellEls[i].classList.add('ship');
     }
 }
 

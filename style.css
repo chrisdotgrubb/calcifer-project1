@@ -25,6 +25,11 @@ main {
     border: 1px solid black;
 }
 
+.ship {
+    background-color: grey;
+    border-radius: 20%;
+}
+
 #playerBoard, #computerBoard {
     display: grid;
     grid-template-columns: repeat(11, 5vmin);
