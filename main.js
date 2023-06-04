@@ -1,3 +1,8 @@
+/*--- const ---*/
+const playerMsg = 'Your turn';
+const computerMsg = 'Computer\'s turn';
+const winningMsg = 'Congrats, you won!';
+const losingMsg = 'You lost!';
 
 /*--- state variables ---*/
 // 1: player, -1: computer
@@ -20,9 +25,12 @@ const playerBoardEl = document.querySelector('#playerBoard');
 const computerBoardEl = document.querySelector('#computerBoard');
 const playerCellEls = [...playerBoardEl.querySelectorAll('.cell')];
 const computerCellEls = [...computerBoardEl.querySelectorAll('.cell')];
+const turnEl = document.querySelector('#turn');
+const playAgainEl = document.querySelector('#playAgain');
 
 /*--- event listeners ---*/
 computerBoardEl.addEventListener('click', onGuess);
+playAgainEl.addEventListener('click', init);
 
 /*--- main ---*/
 init();
@@ -133,7 +141,7 @@ function init() {
             isSunk: false,
             isVertical: false,
         }
-    ]
+    ];
 
     computerShips = [
         {
@@ -181,10 +189,7 @@ function init() {
             isSunk: false,
             isVertical: false,
         }
-    ]
-    // if using as both initial setup and reset game, need a few extras. fix this by creating seperate playAgain function
-    // will need to hide play again button
-    // need to clear classes from all cells, and scoreboard
+    ];
 
     // place coords into ship obj
     // setShipLocationManually();
@@ -207,6 +212,18 @@ function init() {
     render();
 }
 
+// clear stuff to prepare for new game, then restart
+function playAgain() {
+    // hide play again button
+    playAgainEl.classList.add('hidden');
+
+    // add event listener again
+    computerBoardEl.addEventListener('click', onGuess);
+
+    // need to clear classes from all cells, and scoreboard
+
+    init();
+}
 // gets scoreboard elements and appends them to ship.scoreboards
 function getScoreboardElements() {
     for (let ship of playerShips) {
@@ -369,6 +386,7 @@ function computerTurn() {
 
     // check if hit or miss
     let isHit = getHitOrMiss(coords);
+
     // handle hit or miss
     isHit ? handleHit(coords) : handleMiss(coords);
 
@@ -389,6 +407,14 @@ function getComputerGuess() {
             return ['p', row, col]
         };
     };
+
+    // choose randomly if there are no hits that are on floating ships
+
+    // if there is a hit on a floating ship, chose cell next to that hit
+
+    // if there are 2 such hits, guess in same row/col
+
+    // don't guess in space that a remaining ship could not occupy
 }
 
 // takes coordinate, returns 1 for hit, 0 for miss
@@ -547,11 +573,11 @@ function renderScoreboardSunk(ship) {
 // renders when game is won. no return
 function renderWinner() {
     // show winner/loser message
-    console.log('winner is', winner);
+    turnEl.innerText = winner === 1? winningMsg: losingMsg;
 
     // reveal computer ships
-    console.log('render all computer ships');
+    computerShips.forEach(ship => renderShip(ship, 'c'));
 
     // display play again button
-    console.log('reveal play again button');
+    playAgainEl.classList.remove('hidden');
 }

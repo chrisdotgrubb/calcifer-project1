@@ -2,7 +2,7 @@
     box-sizing: border-box;
 }
 
-body {
+main {
     height: 100vh;
     margin: 0;
     font-family:'Courier New', Courier, monospace;
@@ -13,9 +13,17 @@ body {
     font-size: 4vmin;
 }
 
-main {
+nav {
+    position: absolute;
+}
+
+#container {
     display: flex;
     flex-direction: column;
+}
+
+.hidden {
+    visibility: hidden;
 }
 
 .marker {
