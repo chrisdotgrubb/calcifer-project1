@@ -95,6 +95,7 @@ function init() {
             size: 5,
             coords: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
             hits: [false, false, false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -103,6 +104,7 @@ function init() {
             size: 4,
             coords: [[1, 0], [1, 1], [1, 2], [1, 3]],
             hits: [false, false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -111,6 +113,7 @@ function init() {
             size: 3,
             coords: [[2, 0], [2, 1], [2, 2]],
             hits: [false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -119,6 +122,7 @@ function init() {
             size: 3,
             coords: [[3, 0], [3, 1], [3, 2]],
             hits: [false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -127,6 +131,7 @@ function init() {
             size: 2,
             coords: [[4, 0], [4, 1]],
             hits: [false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         }
@@ -138,6 +143,7 @@ function init() {
             size: 5,
             coords: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
             hits: [false, false, false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -146,6 +152,7 @@ function init() {
             size: 4,
             coords: [[1, 0], [1, 1], [1, 2], [1, 3]],
             hits: [false, false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -154,6 +161,7 @@ function init() {
             size: 3,
             coords: [[2, 0], [2, 1], [2, 2]],
             hits: [false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -162,6 +170,7 @@ function init() {
             size: 3,
             coords: [[3, 0], [3, 1], [3, 2]],
             hits: [false, false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         },
@@ -170,6 +179,7 @@ function init() {
             size: 2,
             coords: [[4, 0], [4, 1]],
             hits: [false, false],
+            scoreboards: [],
             isSunk: false,
             isVertical: false,
         }
@@ -186,8 +196,30 @@ function init() {
         renderShip(ship, 'p');
     })
 
+    // stores scoreboard elements in ship.scoreboards array
+    getScoreboardElements();
+
     // currently doing nothing, may eliminate since each action triggers different renders
     render();
+}
+
+// gets scoreboard elements and appends them to ship.scoreboards
+function getScoreboardElements() {
+    for (let ship of playerShips) {
+        const scoreboardEls = document.querySelectorAll(`.p-${ship.name}`);
+        for (let el of scoreboardEls) {
+            ship.scoreboards.push(el)
+        }
+    };
+
+    for (let ship of computerShips) {
+        const scoreboardEls = document.querySelectorAll(`.c-${ship.name}`);
+        for (let el of scoreboardEls) {
+            ship.scoreboards.push(el)
+        }
+    };
+
+
 }
 
 // gets ship coordinates from objects and adds them to the playing board
@@ -334,11 +366,17 @@ function handleHit(coords) {
     renderCell(coords, 'hit');
 
     // if player is hit, renderScoreboardHit()
+    if (board === 'p') {
+        renderScoreboardHit(ship, idx);
+    }
 
     // check if ship now sunk
     ship.isSunk = ship.hits.every(hit => hit);
 
     // if ship sinks, renderScoreboardSunk()
+    if (ship.isSunk) {
+        renderScoreboardSunk(ship, board);
+    };
 
     // if ship sinks, checkWinner(), then set winner to current turn or null
     if (ship.isSunk) {
@@ -416,27 +454,26 @@ function renderShip(ship, player) {
     }
 }
 
-// not used yet
 // takes player's ship that was hit and index, render's hit on the player's scoreboard.
-// not used for computer hits. no return
-// use return values from getShipAtCoord()
+// not used for computer hits
+// use return values from getShipAtCoord(). no return
 // (playerShips[0], 0)
 function renderScoreboardHit(ship, idx) {
-    // show hits/sunk ships below the board
-    console.log('update scoreboard with hit');
+    // apply hit class to <span> inside ship on scoreboard
+    ship.scoreboards[idx].firstChild.classList.add('hit');
 }
 
 // not used yet
-// takes ship hit, and player as string. render's ship as sunk on scoreboard. no return
-// (playerShips[0], 'p')
-function renderScoreboardSunk(ship, player) {
-    console.log('update scoreboard with sunk ship');
+// takes ship sunk, render's ship as sunk on scoreboard. no return
+// (playerShips[0])
+function renderScoreboardSunk(ship) {
+    ship.scoreboards.forEach(el => el.classList.add('sunk'));
 }
 
 // renders when game is won. no return
 function renderWinner() {
     // show winner/loser message
-    console.log('winner is ', winner);
+    console.log('winner is', winner);
 
     // reveal computer ships
     console.log('render all computer ships');
