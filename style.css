@@ -19,10 +19,13 @@ main {
 
 .marker {
     text-align: center;
+    background-color: white;
 }
 
 .cell {
     border: 1px solid black;
+    /* white-space: nowrap; */
+    text-align: center;
 }
 
 .ship {
@@ -30,9 +33,28 @@ main {
     border-radius: 20%;
 }
 
+.hit {
+    background-color: red;
+    border: 1px solid black;
+    border-radius: 50%;
+    display: inline-block;
+    width: 50%;
+    height: 50%;
+}
+
+.miss {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 50%;
+    display: inline-block;
+    width: 50%;
+    height: 50%;
+}
+
 #playerBoard, #computerBoard {
     display: grid;
     grid-template-columns: repeat(11, 5vmin);
     grid-template-rows: repeat(11, 5vmin);
     margin: 5vmin;
+    background-color: aqua;
 }

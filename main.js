@@ -355,14 +355,20 @@ function render() {
 // takes cell and the change happening and applies the appropriate class to the element
 // (['p', 0 , 1], 'hit')
 function renderCell(cell, change) {
-    // change classes on cell
-    if (change === 'hit') {
-        console.log('render hit now', cell);
-    } else if (change === 'miss') {
-        console.log('render miss now', cell);
-    } else if (change === 'ship') {             // not being used now, using renderShip
-        console.log('render ship now', cell);
-    }
+    // get element to change
+    const [player, row, col] = [...cell];
+
+    // get player or computer cells array
+    const cellEls = (player === 'p') ? playerCellEls : computerCellEls;
+
+    // get index of array from id of element
+    const idx = parseInt(row) * 10 + parseInt(col);
+
+    // get inner span
+    const span = cellEls[idx].querySelector('span');
+
+    // add appropriate class
+    span.classList.add(change);
 }
 
 // takes ship object and the player as string, then renders that ship
