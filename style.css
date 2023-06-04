@@ -15,6 +15,7 @@ body {
 
 main {
     display: flex;
+    flex-direction: column;
 }
 
 .marker {
@@ -51,10 +52,25 @@ main {
     height: 50%;
 }
 
+#game {
+    display: flex;
+}
+
+#scoreboards {
+    display: flex;
+}
+
 #playerBoard, #computerBoard {
     display: grid;
     grid-template-columns: repeat(11, 5vmin);
     grid-template-rows: repeat(11, 5vmin);
     margin: 5vmin;
     background-color: aqua;
+}
+
+#playerScoreboard, #computerScoreboard {
+    display: grid;
+    grid-template-columns: repeat(11, 5vmin);
+    grid-template-rows: repeat(3, 5vmin);
+    margin: 5vmin;
 }
