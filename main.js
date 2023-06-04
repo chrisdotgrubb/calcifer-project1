@@ -91,7 +91,7 @@ function init() {
         {
             name: 'carrier',
             size: 5,
-            coords: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
+            coords: [],
             hits: [false, false, false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -100,7 +100,7 @@ function init() {
         {
             name: 'battleship',
             size: 4,
-            coords: [[1, 0], [1, 1], [1, 2], [1, 3]],
+            coords: [],
             hits: [false, false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -109,7 +109,7 @@ function init() {
         {
             name: 'cruiser',
             size: 3,
-            coords: [[2, 0], [2, 1], [2, 2]],
+            coords: [],
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -118,7 +118,7 @@ function init() {
         {
             name: 'submarine',
             size: 3,
-            coords: [[3, 0], [3, 1], [3, 2]],
+            coords: [],
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -127,7 +127,7 @@ function init() {
         {
             name: 'destroyer',
             size: 2,
-            coords: [], // [[4, 0], [4, 1]]
+            coords: [],
             hits: [false, false],
             scoreboards: [],
             isSunk: false,
@@ -139,7 +139,7 @@ function init() {
         {
             name: 'carrier',
             size: 5,
-            coords: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
+            coords: [],
             hits: [false, false, false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -148,7 +148,7 @@ function init() {
         {
             name: 'battleship',
             size: 4,
-            coords: [[1, 0], [1, 1], [1, 2], [1, 3]],
+            coords: [],
             hits: [false, false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -157,7 +157,7 @@ function init() {
         {
             name: 'cruiser',
             size: 3,
-            coords: [[2, 0], [2, 1], [2, 2]],
+            coords: [],
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -166,7 +166,7 @@ function init() {
         {
             name: 'submarine',
             size: 3,
-            coords: [[3, 0], [3, 1], [3, 2]],
+            coords: [],
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
@@ -187,8 +187,11 @@ function init() {
     // need to clear classes from all cells, and scoreboard
 
     // place coords into ship obj
-    setShipLocationManually();
-    setShipLocationRandomly(computerShips[4]);
+    // setShipLocationManually();
+    // setShipLocationRandomly(computerShips[4], 'c');
+    playerShips.forEach(ship => setShipLocationRandomly(ship, 'p'));
+    computerShips.forEach(ship => setShipLocationRandomly(ship, 'c'));
+
     // place player ships into playerBoard for right now, should move to after ship placements are picked
     placeShipsOntoBoard();
 
@@ -231,7 +234,12 @@ function setShipLocationManually(ship, startingCoord) {
 }
 
 function setShipLocationRandomly(ship, player) {
+    // get player or computer ships
     let ships = player === 'p' ? playerShips : computerShips;
+
+    // randomly set vertical or horizontal
+    ship.isVertical = Math.random() < 0.5;
+
     // get locations of current ships
     const currentCoords = [];
     ships.forEach(item => {
@@ -514,6 +522,7 @@ function renderShip(ship, player) {
     for (let coord of ship.coords) {
         let i = coord[0] * 10 + coord[1]
         cellEls[i].classList.add('ship');
+        cellEls[i].classList.add(ship.name);
     };
 }
 
@@ -523,6 +532,8 @@ function renderShip(ship, player) {
 // (playerShips[0], 0)
 function renderScoreboardHit(ship, idx) {
     // apply hit class to <span> inside ship on scoreboard
+    console.log('rendering scoreboard');
+    console.log(ship.scoreboards[idx]);
     ship.scoreboards[idx].firstChild.classList.add('hit');
 }
 

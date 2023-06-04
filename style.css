@@ -34,6 +34,26 @@ main {
     border-radius: 20%;
 }
 
+.p-carrier, .c-carrier, .carrier {
+    background-color: #553322;
+}
+
+.p-battleship, .c-battleship, .battleship {
+    background-color: #665522;
+}
+
+.p-cruiser, .c-cruiser, .cruiser {
+    background-color: #444422;
+}
+
+.p-submarine, .c-submarine, .submarine {
+    background-color: #776633;
+}
+
+.p-destroyer, .c-destroyer, .destroyer {
+    background-color: #775555;
+}
+
 .hit {
     background-color: red;
     border: 1px solid black;
@@ -53,7 +73,7 @@ main {
 }
 
 .sunk {
-    background-color: orange;
+    background-color: red;
 }
 
 #game {
