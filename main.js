@@ -1,7 +1,7 @@
 
 /*--- state variables ---*/
 // 1: player, -1: computer
-let turn;
+// let turn;
 let winner;
 
 // playerGuesses compares to computerBoard
@@ -32,7 +32,7 @@ init();
 
 // start/restart game
 function init() {
-    turn = -1;
+    // turn = -1;
     winner = null;
 
     playerBoard = [
@@ -244,18 +244,53 @@ function onGuess(evt) {
     // handle hit or miss
     isHit ? handleHit(coords) : handleMiss(coords);
 
+    // remove event listener to prepare for win or computer's turn
+    computerBoardEl.removeEventListener('click', onGuess);
+
     // handle win or change turns
     if (winner) {
         renderWinner();
     } else {
-        turn *= -1;
+        // turn *= -1;
+        // may want to wait a few seconds before computer takes turn
+        computerTurn();
+    };
+}
+
+// handle computer's turn
+// triggered after player's turn, but could be called first if computer gets first turn
+function computerTurn() {
+    // pick cell
+    const coords = getComputerGuess();
+    const [board, row, col] = [...coords];
+
+    // check if hit or miss
+    let isHit = getHitOrMiss(coords);
+    // handle hit or miss
+    isHit ? handleHit(coords) : handleMiss(coords);
+
+    // handle win or change turns
+    if (winner) {
+        renderWinner();
+    } else {
+        computerBoardEl.addEventListener('click', onGuess);
+    }
+}
+
+// returns cell for computer's guess
+function getComputerGuess() {
+    while (true) {
+        let row = Math.floor(Math.random() * 10);
+        let col = Math.floor(Math.random() * 10);
+        if (!computerGuesses[row][col]) {
+            return ['p', row, col]
+        };
     };
 }
 
 // takes coordinate, returns 1 for hit, 0 for miss
 // (['p', 0, 0])
 function getHitOrMiss(coords) {
-
     const [board, row, col] = [...coords];
 
     if (board === 'p') {
