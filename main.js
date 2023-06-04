@@ -190,6 +190,7 @@ function init() {
     render();
 }
 
+// gets ship coordinates from objects and adds them to the playing board
 function placeShipsOntoBoard() {
     for (let ship of playerShips) {
         for (let coord of ship.coords) {
@@ -204,12 +205,14 @@ function placeShipsOntoBoard() {
     };
 }
 
+// takes cell element, returns coordinates of that cell in the board as arr. ['c', 0, 1] or ['p', 0, 1]
+// (div element)
 function extractCoords(cellEl) {
-    // takes cell div element, returns coordinates of that cell in the board as arr ['c', 0, 1] or ['p', 0, 1]
     return cellEl.id.split('-');
 }
 
-// taking turn
+// handles player turn, activated onClick of computer's grid
+// (click event)
 function onGuess(evt) {
     // get cell clicked
     const target = evt.target
@@ -221,7 +224,8 @@ function onGuess(evt) {
     const coords = extractCoords(target);
     const [cellBoard, cellRow, cellCol] = [...coords];
 
-    // check legal guess (in guesses object not classes)
+    // check legal guess (check guesses array not element's classes)
+    // I may not need this, as only the player will be clicking, computer will likely be handled differently
     if (cellBoard === 'p') {
         if (computerGuesses[cellRow][cellCol]) {
             // cell has already been guessed
@@ -234,13 +238,13 @@ function onGuess(evt) {
         }
     };
 
-    // check if hit or miss, isHit = getHitOrMiss()
+    // check if hit or miss
     let isHit = getHitOrMiss(coords);
 
     // handle hit or miss
     isHit ? handleHit(coords) : handleMiss(coords);
 
-    // if not winner: change turns
+    // handle win or change turns
     if (winner) {
         renderWinner();
     } else {
@@ -248,8 +252,9 @@ function onGuess(evt) {
     };
 }
 
+// takes coordinate, returns 1 for hit, 0 for miss
+// (['p', 0, 0])
 function getHitOrMiss(coords) {
-    // take cell, returns 1 for hit, 0 for miss
 
     const [board, row, col] = [...coords];
 
@@ -260,7 +265,8 @@ function getHitOrMiss(coords) {
     };
 }
 
-// takes coordinate ['p', 0, 0] returns ship and index of location hit
+// takes coordinate returns ship and index of location hit.
+// (['p', 0, 0])
 function getShipAtCoord(coords) {
     const [board, row, col] = [...coords];
     ships = (board === 'p') ? playerShips : computerShips;
@@ -273,6 +279,8 @@ function getShipAtCoord(coords) {
     }
 }
 
+// takes coordinate of hit and handles all hit logic, no return
+// (['p', 0, 0])
 function handleHit(coords) {
     // update playerGuesses or computerGuesses
     const [board, row, col] = [...coords];
@@ -287,21 +295,24 @@ function handleHit(coords) {
     // update ship hit to true
     ship.hits[idx] = true;
 
+    // render the hit
     renderCell(coords, 'hit');
 
-    // check if ship now sunk
-    ship.isSunk = ship.hits.every(hit => hit === true);
-
     // if player is hit, renderScoreboardHit()
+
+    // check if ship now sunk
+    ship.isSunk = ship.hits.every(hit => hit);
 
     // if ship sinks, renderScoreboardSunk()
 
     // if ship sinks, checkWinner(), then set winner to current turn or null
     if (ship.isSunk) {
-        winner = checkWinner(coords) ? turn : null;
+        winner = checkWinner(board);
     };
 }
 
+// takes coordinate of miss and handles all miss logic, no return
+// (['p', 0, 0])
 function handleMiss(coords) {
     // update playerGuesses or computerGuesses
     const [board, row, col] = [...coords];
@@ -310,51 +321,52 @@ function handleMiss(coords) {
     } else {
         playerGuesses[row][col] = -1;
     };
-
     renderCell(coords, 'miss');
-
 }
 
-function checkWinner(cell) {
+// takes player that was hit as string. on win returns the opposing player, or null
+// ('p')
+function checkWinner(player) {
     // checks if all ships of a player are destroyed
-    const [board, row, col] = [...cell];
-
-    // returns 1 or -1 for winner, else null
-    if (board === 'p') {
+    if (player === 'p') {
         for (ship of playerShips) {
             if (!ship.isSunk) {
                 return false;
             }
         }
+        return -1;
     } else {
         for (ship of computerShips) {
             if (!ship.isSunk) {
                 return false;
             }
         }
+        return 1;
     };
-    return true;
 }
 
-// rendering
+// rendering, this is unused for now. probably uneeded.
 function render() {
     // for each cell, renderCell();
 
     // render scoreboard
-
 }
 
+// takes cell and the change happening and applies the appropriate class to the element
+// (['p', 0 , 1], 'hit')
 function renderCell(cell, change) {
     // change classes on cell
     if (change === 'hit') {
-        console.log('render hit now');
+        console.log('render hit now', cell);
     } else if (change === 'miss') {
-        console.log('render miss now');
-    } else if (change === 'ship') {
-        console.log('render ship now');
+        console.log('render miss now', cell);
+    } else if (change === 'ship') {             // not being used now, using renderShip
+        console.log('render ship now', cell);
     }
 }
 
+// takes ship object and the player as string, then renders that ship
+// (playerShips[0], 'p')
 function renderShip(ship, player) {
     let cellEls = (player === 'p') ? playerCellEls : computerCellEls;
     for (let coord of ship.coords) {
@@ -363,15 +375,31 @@ function renderShip(ship, player) {
     }
 }
 
-function renderScoreboard() {
+// not used yet
+// takes player's ship that was hit and index, render's hit on the player's scoreboard.
+// not used for computer hits. no return
+// use return values from getShipAtCoord()
+// (playerShips[0], 0)
+function renderScoreboardHit(ship, idx) {
     // show hits/sunk ships below the board
-    console.log('update scoreboard now');
+    console.log('update scoreboard with hit');
 }
 
+// not used yet
+// takes ship hit, and player as string. render's ship as sunk on scoreboard. no return
+// (playerShips[0], 'p')
+function renderScoreboardSunk(ship, player) {
+    console.log('update scoreboard with sunk ship');
+}
+
+// renders when game is won. no return
 function renderWinner() {
     // show winner/loser message
-    console.log('winner is ', turn);
+    console.log('winner is ', winner);
+
     // reveal computer ships
+    console.log('render all computer ships');
 
     // display play again button
+    console.log('reveal play again button');
 }
