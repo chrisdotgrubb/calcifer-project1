@@ -27,10 +27,12 @@ const playerCellEls = [...playerBoardEl.querySelectorAll('.cell')];
 const computerCellEls = [...computerBoardEl.querySelectorAll('.cell')];
 const turnEl = document.querySelector('#turn');
 const playAgainEl = document.querySelector('#playAgain');
+const playerScoreboardEl = document.querySelector('#playerScoreboard');
 
 /*--- event listeners ---*/
 computerBoardEl.addEventListener('click', onGuess);
 playAgainEl.addEventListener('click', playAgain);
+playerScoreboardEl.addEventListener('click', setShipLocationOnClick);
 
 /*--- main ---*/
 init();
@@ -211,6 +213,175 @@ function init() {
     turnEl.innerText = playerMsg;
 }
 
+function initWhenPlacingShipsWithEventListener() {
+    winner = null;
+
+    playerBoard = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+
+    computerBoard = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+
+    // 0: not guessed, 1: hit, -1: miss
+    playerGuesses = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+
+    // 0: not guessed, 1: hit, -1: miss
+    computerGuesses = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+
+    playerShips = [
+        {
+            name: 'carrier',
+            size: 5,
+            coords: [],
+            hits: [false, false, false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'battleship',
+            size: 4,
+            coords: [],
+            hits: [false, false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'cruiser',
+            size: 3,
+            coords: [],
+            hits: [false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'submarine',
+            size: 3,
+            coords: [],
+            hits: [false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'destroyer',
+            size: 2,
+            coords: [],
+            hits: [false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        }
+    ];
+
+    computerShips = [
+        {
+            name: 'carrier',
+            size: 5,
+            coords: [],
+            hits: [false, false, false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'battleship',
+            size: 4,
+            coords: [],
+            hits: [false, false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'cruiser',
+            size: 3,
+            coords: [],
+            hits: [false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'submarine',
+            size: 3,
+            coords: [],
+            hits: [false, false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        },
+        {
+            name: 'destroyer',
+            size: 2,
+            coords: [],
+            hits: [false, false],
+            scoreboards: [],
+            isSunk: false,
+            isVertical: false,
+        }
+    ];
+
+    // stores scoreboard elements in ship.scoreboards array. needs done after ship objects created.
+    getScoreboardElements();
+
+    // allow for placing ships
+
+    // then after player ships are placed, finish the setup
+
+}
+
+function postPlacingShips() {
+    // randomly place computer ships
+    computerShips.forEach(ship => setShipLocationRandomly(ship, 'c'));
+
+    turnEl.innerText = playerMsg;
+}
+
 // clear stuff to prepare for new game, then restart
 function playAgain() {
     // hide play again button
@@ -329,6 +500,52 @@ function setShipLocationRandomly(ship, player) {
     // if valid, asign to ship. else find new starting position
     potential.forEach(coord => ship.coords.push(coord));
 }
+
+function setShipLocationOnClick(evt) {
+    // get ship clicked on scoreboard display
+    const target = evt.target;
+
+    // check that a ship was clicked
+    if (!target.classList.contains('ship')) {
+        return;
+    };
+
+    // remove ship event listeners
+    playerScoreboardEl.removeEventListener('click', setShipLocationOnClick);
+
+    // select ship to be placed, only player ships will use this function
+    // loop over ships to see which ship's scoreboard element was clicked
+    let currShip;
+    playerShips.forEach(ship => {
+        ship.scoreboards.forEach(el => {
+            if (el === target) {
+                currShip = ship;
+            };
+        });
+    });
+    console.log(currShip);
+
+    // determine isVertical
+    
+    // display ship on hover of player board
+    
+    // add event listener on player board div
+
+    // take first cell of ship - left or top
+
+    // check all potential cells for conflicts - sides or ships
+
+    // place coords in ship
+
+    // add ship to board to be able to check for future conflicts
+
+    // remove board event listener
+
+    // if remaining ship, add ship event listener, else proceed with initiation of game
+
+}
+
+
 
 // gets ship coordinates from objects and adds them to the playing board
 function placeShipsOntoBoard() {
