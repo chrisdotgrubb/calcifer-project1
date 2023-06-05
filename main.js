@@ -205,13 +205,10 @@ function init() {
         renderShip(ship, 'p');
     })
 
-    // stores scoreboard elements in ship.scoreboards array
+    // stores scoreboard elements in ship.scoreboards array. needs done after ship objects created.
     getScoreboardElements();
 
     turnEl.innerText = playerMsg;
-    
-    // currently doing nothing, may eliminate since each action triggers different renders
-    render();
 }
 
 // clear stuff to prepare for new game, then restart
@@ -228,14 +225,12 @@ function playAgain() {
         el.classList = ['cell'];
         el.firstChild.classList = [];
     });
-
     playerShips.forEach(ship => {
         ship.scoreboards.forEach(cell => {
             cell.firstChild.classList.remove('hit');
             cell.classList.remove('sunk');
         });
     });
-
     computerShips.forEach(ship => {
         ship.scoreboards.forEach(cell => cell.classList.remove('sunk'));
     });
@@ -245,6 +240,7 @@ function playAgain() {
 
     init();
 }
+
 // gets scoreboard elements and appends them to ship.scoreboards
 function getScoreboardElements() {
     for (let ship of playerShips) {
@@ -262,8 +258,7 @@ function getScoreboardElements() {
     };
 }
 
-// [4, 0], [4, 1]
-
+// not being used yet
 // attempts to set ship's coordinates
 // takes ship and starting coordinate. left-most position for horizontal ship, top for vertical
 function setShipLocationManually(ship, startingCoord) {
@@ -271,9 +266,10 @@ function setShipLocationManually(ship, startingCoord) {
     playerShips[4].coords.push([5, 1]);
 }
 
+// sets ship location, using for both player and computer
 function setShipLocationRandomly(ship, player) {
     // get player or computer ships
-    let ships = player === 'p' ? playerShips : computerShips;
+    const ships = (player === 'p') ? playerShips : computerShips;
 
     // randomly set vertical or horizontal
     ship.isVertical = Math.random() < 0.5;
@@ -283,6 +279,7 @@ function setShipLocationRandomly(ship, player) {
     ships.forEach(item => {
         item.coords.forEach(coord => currentCoords.push(coord));
     });
+
     // figure out valid starting locations. left-most position for horizontal ship, top for vertical
     let maxStartingRow;
     let maxStartingCol;
@@ -298,14 +295,15 @@ function setShipLocationRandomly(ship, player) {
     let potential = [];
 
     while (!isValid) {
-        // try positions
+        potential = [];
+
+        // try starting position
         const row = Math.floor(Math.random() * maxStartingRow);
         const col = Math.floor(Math.random() * maxStartingCol);
 
         // get potential coordinates based off of starting position, ship size, and isVertical
         // v [0,0], [1,0]
         // h [0,0], [0,1]
-        potential = [];
         if (ship.isVertical) {
             // row, col - row col + 1
             for (let i = 0; i < ship.size; i++) {
@@ -317,14 +315,15 @@ function setShipLocationRandomly(ship, player) {
             }
         };
         isValid = true;
+
         // compare current positions to potential new ones
         potential.forEach(item => {
             currentCoords.forEach(coord => {
                 if (item[0] === coord[0] && item[1] === coord[1]) {
                     isValid = false;
                 }
-            })
-        })
+            });
+        });
     };
 
     // if valid, asign to ship. else find new starting position
@@ -366,21 +365,13 @@ function onGuess(evt) {
     const [cellBoard, cellRow, cellCol] = [...coords];
 
     // check legal guess (check guesses array not element's classes)
-    // I may not need this, as only the player will be clicking, computer will likely be handled differently
-    if (cellBoard === 'p') {
-        if (computerGuesses[cellRow][cellCol]) {
-            // cell has already been guessed
-            return;
-        };
-    } else {
-        if (playerGuesses[cellRow][cellCol]) {
-            // cell has already been guessed
-            return;
-        }
+    if (playerGuesses[cellRow][cellCol]) {
+        // cell has already been guessed
+        return;
     };
 
     // check if hit or miss
-    let isHit = getHitOrMiss(coords);
+    const isHit = getHitOrMiss(coords);
 
     // handle hit or miss
     isHit ? handleHit(coords) : handleMiss(coords);
@@ -392,8 +383,7 @@ function onGuess(evt) {
     if (winner) {
         renderWinner();
     } else {
-        // turn *= -1;
-        // may want to wait a few seconds before computer takes turn
+        // add setTimeout before computer takes turn, and change display message
         computerTurn();
     };
 }
@@ -403,10 +393,9 @@ function onGuess(evt) {
 function computerTurn() {
     // pick cell
     const coords = getComputerGuess();
-    const [board, row, col] = [...coords];
 
     // check if hit or miss
-    let isHit = getHitOrMiss(coords);
+    const isHit = getHitOrMiss(coords);
 
     // handle hit or miss
     isHit ? handleHit(coords) : handleMiss(coords);
@@ -415,6 +404,7 @@ function computerTurn() {
     if (winner) {
         renderWinner();
     } else {
+        // change display message
         computerBoardEl.addEventListener('click', onGuess);
     }
 }
@@ -422,10 +412,10 @@ function computerTurn() {
 // returns cell for computer's guess
 function getComputerGuess() {
     while (true) {
-        let row = Math.floor(Math.random() * 10);
-        let col = Math.floor(Math.random() * 10);
+        const row = Math.floor(Math.random() * 10);
+        const col = Math.floor(Math.random() * 10);
         if (!computerGuesses[row][col]) {
-            return ['p', row, col]
+            return ['p', row, col];
         };
     };
 
@@ -450,7 +440,7 @@ function getHitOrMiss(coords) {
     };
 }
 
-// takes coordinate returns ship and index of location hit.
+// takes coordinate, returns ship and index of location hit.
 // (['p', 0, 0])
 function getShipAtCoord(coords) {
     const [board, row, col] = [...coords];
@@ -467,13 +457,15 @@ function getShipAtCoord(coords) {
 // takes coordinate of hit and handles all hit logic, no return
 // (['p', 0, 0])
 function handleHit(coords) {
-    // update playerGuesses or computerGuesses
     const [board, row, col] = [...coords];
+
+    // update playerGuesses or computerGuesses
     if (board === 'p') {
         computerGuesses[row][col] = 1;
     } else {
         playerGuesses[row][col] = 1;
     };
+
     // get ship that was hit
     const [ship, idx] = getShipAtCoord(coords);
 
@@ -496,7 +488,7 @@ function handleHit(coords) {
         renderScoreboardSunk(ship, board);
     };
 
-    // if ship sinks, checkWinner(), then set winner to current turn or null
+    // if ship sinks, checkWinner(), then set winner to 1, -1, or null
     if (ship.isSunk) {
         winner = checkWinner(board);
     };
@@ -505,13 +497,12 @@ function handleHit(coords) {
 // takes coordinate of miss and handles all miss logic, no return
 // (['p', 0, 0])
 function handleMiss(coords) {
-    // update playerGuesses or computerGuesses
     const [board, row, col] = [...coords];
-    if (board === 'p') {
-        computerGuesses[row][col] = -1;
-    } else {
-        playerGuesses[row][col] = -1;
-    };
+    const guesses = (board === 'p') ? computerGuesses : playerGuesses;
+
+    // update playerGuesses or computerGuesses
+    guesses[row][col] = -1
+
     renderCell(coords, 'miss');
 }
 
@@ -522,31 +513,23 @@ function checkWinner(player) {
     if (player === 'p') {
         for (ship of playerShips) {
             if (!ship.isSunk) {
-                return false;
+                return null;
             }
         };
         return -1;
     } else {
         for (ship of computerShips) {
             if (!ship.isSunk) {
-                return false;
+                return null;
             }
         };
         return 1;
     };
 }
 
-// rendering, this is unused for now. probably uneeded.
-function render() {
-    // for each cell, renderCell();
-
-    // render scoreboard
-}
-
 // takes cell and the change happening and applies the appropriate class to the element
 // (['p', 0 , 1], 'hit')
 function renderCell(cell, change) {
-    // get element to change
     const [player, row, col] = [...cell];
 
     // get player or computer cells array
@@ -555,19 +538,16 @@ function renderCell(cell, change) {
     // get index of array from id of element
     const idx = parseInt(row) * 10 + parseInt(col);
 
-    // get inner span
-    const span = cellEls[idx].querySelector('span');
-
-    // add appropriate class
-    span.classList.add(change);
+    // add class to inner <span>
+    cellEls[idx].firstChild.classList.add(change);
 }
 
 // takes ship object and the player as string, then renders that ship
 // (playerShips[0], 'p')
 function renderShip(ship, player) {
-    let cellEls = (player === 'p') ? playerCellEls : computerCellEls;
+    const cellEls = (player === 'p') ? playerCellEls : computerCellEls;
     for (let coord of ship.coords) {
-        let i = coord[0] * 10 + coord[1]
+        const i = coord[0] * 10 + coord[1]
         cellEls[i].classList.add('ship');
         cellEls[i].classList.add(ship.name);
     };
@@ -582,7 +562,6 @@ function renderScoreboardHit(ship, idx) {
     ship.scoreboards[idx].firstChild.classList.add('hit');
 }
 
-// not used yet
 // takes ship sunk, render's ship as sunk on scoreboard. no return
 // (playerShips[0])
 function renderScoreboardSunk(ship) {
@@ -592,7 +571,7 @@ function renderScoreboardSunk(ship) {
 // renders when game is won. no return
 function renderWinner() {
     // show winner/loser message
-    turnEl.innerText = winner === 1? winningMsg: losingMsg;
+    turnEl.innerText = winner === 1 ? winningMsg : losingMsg;
 
     // reveal computer ships
     computerShips.forEach(ship => renderShip(ship, 'c'));
