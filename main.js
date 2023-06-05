@@ -30,7 +30,7 @@ const playAgainEl = document.querySelector('#playAgain');
 
 /*--- event listeners ---*/
 computerBoardEl.addEventListener('click', onGuess);
-playAgainEl.addEventListener('click', init);
+playAgainEl.addEventListener('click', playAgain);
 
 /*--- main ---*/
 init();
@@ -208,6 +208,8 @@ function init() {
     // stores scoreboard elements in ship.scoreboards array
     getScoreboardElements();
 
+    turnEl.innerText = playerMsg;
+    
     // currently doing nothing, may eliminate since each action triggers different renders
     render();
 }
@@ -217,10 +219,29 @@ function playAgain() {
     // hide play again button
     playAgainEl.classList.add('hidden');
 
+    // need to clear classes from all cells, and scoreboard
+    playerCellEls.forEach(el => {
+        el.classList = ['cell'];
+        el.firstChild.classList = [];
+    });
+    computerCellEls.forEach(el => {
+        el.classList = ['cell'];
+        el.firstChild.classList = [];
+    });
+
+    playerShips.forEach(ship => {
+        ship.scoreboards.forEach(cell => {
+            cell.firstChild.classList.remove('hit');
+            cell.classList.remove('sunk');
+        });
+    });
+
+    computerShips.forEach(ship => {
+        ship.scoreboards.forEach(cell => cell.classList.remove('sunk'));
+    });
+
     // add event listener again
     computerBoardEl.addEventListener('click', onGuess);
-
-    // need to clear classes from all cells, and scoreboard
 
     init();
 }
@@ -558,8 +579,6 @@ function renderShip(ship, player) {
 // (playerShips[0], 0)
 function renderScoreboardHit(ship, idx) {
     // apply hit class to <span> inside ship on scoreboard
-    console.log('rendering scoreboard');
-    console.log(ship.scoreboards[idx]);
     ship.scoreboards[idx].firstChild.classList.add('hit');
 }
 
