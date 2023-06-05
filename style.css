@@ -2,19 +2,33 @@
     box-sizing: border-box;
 }
 
+body {
+    background-color: #3fb2d4;
+}
+
 main {
-    height: 100vh;
+    height: 90vh;
     margin: 0;
     font-family:'Courier New', Courier, monospace;
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
     align-items: center;
     font-size: 4vmin;
+    color: #002626;
 }
 
 nav {
-    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 4vmin;
+    font-size: large;
+    color: #002626;
+}
+
+nav > * {
+    margin: 0 10vmin;
+    text-align: center;
 }
 
 #container {
@@ -28,12 +42,10 @@ nav {
 
 .marker {
     text-align: center;
-    background-color: white;
+    background-color: #3fb2d4;
 }
 
 .cell {
-    border: 1px solid black;
-    /* white-space: nowrap; */
     text-align: center;
 }
 
@@ -81,7 +93,7 @@ nav {
 }
 
 .sunk {
-    background-color: red;
+    background: linear-gradient(yellow, orange, red, red);
 }
 
 #game {
@@ -91,19 +103,41 @@ nav {
 #scoreboards {
     display: flex;
     text-align: center;
+    margin-top: 5vmin;
 }
 
 #playerBoard, #computerBoard {
     display: grid;
     grid-template-columns: repeat(11, 5vmin);
     grid-template-rows: repeat(11, 5vmin);
-    margin: 5vmin;
-    background-color: aqua;
+    margin: 1vmin;
+    background-color: #2b628e;
+}
+
+#playerBoard > *, #computerBoard > *{
+    outline: 1px solid black;
+    margin-left: 1px;
+    margin-top: 1px;
 }
 
 #playerScoreboard, #computerScoreboard {
     display: grid;
     grid-template-columns: repeat(11, 5vmin);
     grid-template-rows: repeat(3, 5vmin);
-    margin: 5vmin;
+    margin: 1vmin;
+}
+
+#playAgain {
+    text-align: center;
+    margin-top: 10px;
+}
+
+#playAgain > button {
+    background-color: #4d9d4a;
+    color: white;
+    border: none;
+    border-radius: 5%;
+    font-size: large;
+    padding: 8px;
+
 }
