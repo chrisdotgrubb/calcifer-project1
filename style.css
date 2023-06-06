@@ -3,7 +3,7 @@
 }
 
 body {
-    background-color: #3fb2d4;
+    background-color: #dcdcdc;
 }
 
 main {
@@ -14,7 +14,7 @@ main {
     flex-direction: column;
     align-items: center;
     font-size: 4vmin;
-    color: #002626;
+    color: #231f20;
 }
 
 nav {
@@ -23,7 +23,7 @@ nav {
     justify-content: center;
     padding-left: 4vmin;
     font-size: large;
-    color: #002626;
+    color: #231f20;
 }
 
 nav > * {
@@ -42,7 +42,7 @@ nav > * {
 
 .marker {
     text-align: center;
-    background-color: #3fb2d4;
+    background-color: #dcdcdc;
 }
 
 .cell {
@@ -50,33 +50,31 @@ nav > * {
 }
 
 .ship {
-    /* background-color: grey; */
     border-radius: 20%;
 }
 
 .p-carrier, .c-carrier, .carrier {
-    background-color: #553322;
+    background-color: #444444;
 }
 
 .p-battleship, .c-battleship, .battleship {
-    background-color: #665522;
+    background-color: #555555;
 }
 
 .p-cruiser, .c-cruiser, .cruiser {
-    background-color: #444422;
+    background-color: #666666;
 }
 
 .p-submarine, .c-submarine, .submarine {
-    background-color: #776633;
+    background-color: #888888;
 }
 
 .p-destroyer, .c-destroyer, .destroyer {
-    background-color: #775555;
+    background-color: #aaaaaa;
 }
 
 .hit {
-    background-color: red;
-    border: 1px solid black;
+    background: radial-gradient(#cc2200, #bb2222, #ba2d0b);
     border-radius: 50%;
     display: inline-block;
     width: 50%;
@@ -84,8 +82,7 @@ nav > * {
 }
 
 .miss {
-    background-color: white;
-    border: 1px solid black;
+    background: radial-gradient(#ffffff, #dddddd, #999999);
     border-radius: 50%;
     display: inline-block;
     width: 50%;
@@ -93,11 +90,11 @@ nav > * {
 }
 
 .sunk {
-    background: linear-gradient(yellow, orange, red, red);
+    background: linear-gradient(#ffcc00, #ff7700, #ff5500, #dd3311, #bb2222, #881133);
 }
 
 .pending {
-    background-color: yellowgreen;
+    background-color: #404040;
 }
 
 #game {
@@ -115,7 +112,7 @@ nav > * {
     grid-template-columns: repeat(11, 5vmin);
     grid-template-rows: repeat(11, 5vmin);
     margin: 1vmin;
-    background-color: #2b628e;
+    background-color: #006daa;
 }
 
 #playerBoard > *, #computerBoard > *{
@@ -137,11 +134,10 @@ nav > * {
 }
 
 #playAgain > button {
-    background-color: #4d9d4a;
+    background-color: #57737a;
     color: white;
     border: none;
     border-radius: 5%;
     font-size: large;
     padding: 8px;
-
 }
