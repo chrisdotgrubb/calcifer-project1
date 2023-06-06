@@ -117,7 +117,7 @@ function init() {
             hits: [false, false, false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         },
         {
             name: 'cruiser',
@@ -126,7 +126,7 @@ function init() {
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         },
         {
             name: 'submarine',
@@ -135,7 +135,7 @@ function init() {
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         },
         {
             name: 'destroyer',
@@ -144,7 +144,7 @@ function init() {
             hits: [false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         }
     ];
 
@@ -156,7 +156,7 @@ function init() {
             hits: [false, false, false, false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         },
         {
             name: 'battleship',
@@ -165,7 +165,7 @@ function init() {
             hits: [false, false, false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         },
         {
             name: 'cruiser',
@@ -174,7 +174,7 @@ function init() {
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         },
         {
             name: 'submarine',
@@ -183,7 +183,7 @@ function init() {
             hits: [false, false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         },
         {
             name: 'destroyer',
@@ -192,7 +192,7 @@ function init() {
             hits: [false, false],
             scoreboards: [],
             isSunk: false,
-            isVertical: false,
+            isVertical: true,
         }
     ];
 
@@ -258,7 +258,6 @@ function setShipLocationRandomly(ship, player) {
 
     // randomly set vertical or horizontal
     ship.isVertical = Math.random() < 0.5;
-
     // get locations of current ships
     const currentCoords = [];
     ships.forEach(item => {
@@ -271,9 +270,9 @@ function setShipLocationRandomly(ship, player) {
 
     if (ship.isVertical) {
         maxStartingRow = 9;
-        maxStartingCol = 10 - ship.size;
+        maxStartingCol = 11 - ship.size;
     } else {
-        maxStartingRow = 10 - ship.size;
+        maxStartingRow = 11 - ship.size;
         maxStartingCol = 9;
     }
     let isValid = false;
@@ -313,6 +312,7 @@ function setShipLocationRandomly(ship, player) {
 
     // if valid, asign to ship. else find new starting position
     potential.forEach(coord => ship.coords.push(coord));
+    renderShip(ship, player)
 }
 
 // gets ship to be placed, from player scoreboard
@@ -431,11 +431,11 @@ function attemptToPlaceShip(ship, row, col) {
     let maxStartingCol;
 
     if (ship.isVertical) {
-        maxStartingRow = 9;
-        maxStartingCol = 10 - ship.size;
-    } else {
         maxStartingRow = 10 - ship.size;
         maxStartingCol = 9;
+    } else {
+        maxStartingRow = 9;
+        maxStartingCol = 10 - ship.size;
     }
     if (row > maxStartingRow || col > maxStartingCol) {
         return null;
@@ -450,11 +450,11 @@ function attemptToPlaceShip(ship, row, col) {
     if (ship.isVertical) {
         // row, col - row col + 1
         for (let i = 0; i < ship.size; i++) {
-            potential.push([row, col + i]);
+            potential.push([row + i, col]);
         }
     } else {
         for (let i = 0; i < ship.size; i++) {
-            potential.push([row + i, col]);
+            potential.push([row, col + i]);
         }
     };
     isValid = true;
@@ -771,7 +771,7 @@ function mouseoverPendingPlacement(evt) {
         // get pending cells
         const cells = [];
         const idx = row * 10 + col;
-        const adder = 10; // change when adding in isVertical / horizontal logic
+        const adder = (shipToBePlaced.isVertical) ? 10: 1; // change when adding in isVertical / horizontal logic
 
         for (let i = 0; i < shipToBePlaced.size; i++) {
             let newIdx = i * adder + idx;
