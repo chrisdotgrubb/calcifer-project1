@@ -20,6 +20,8 @@ let computerGuesses;
 let playerShips;
 let computerShips;
 
+let shipToBePlaced;
+
 /*--- cached elements ---*/
 const playerBoardEl = document.querySelector('#playerBoard');
 const computerBoardEl = document.querySelector('#computerBoard');
@@ -30,12 +32,13 @@ const playAgainEl = document.querySelector('#playAgain');
 const playerScoreboardEl = document.querySelector('#playerScoreboard');
 
 /*--- event listeners ---*/
-computerBoardEl.addEventListener('click', onGuess);
 playAgainEl.addEventListener('click', playAgain);
-playerScoreboardEl.addEventListener('click', setShipLocationOnClick);
+
+// this will need to be added after ships are placed
+computerBoardEl.addEventListener('click', onGuess);
 
 /*--- main ---*/
-init();
+initWhenPlacingShipsWithEventListener();
 
 /*--- functions ---*/
 
@@ -370,6 +373,7 @@ function initWhenPlacingShipsWithEventListener() {
     getScoreboardElements();
 
     // allow for placing ships
+    playerScoreboardEl.addEventListener('click', setShipLocationOnClick);
 
     // then after player ships are placed, finish the setup
 
@@ -515,22 +519,35 @@ function setShipLocationOnClick(evt) {
 
     // select ship to be placed, only player ships will use this function
     // loop over ships to see which ship's scoreboard element was clicked
-    let currShip;
     playerShips.forEach(ship => {
         ship.scoreboards.forEach(el => {
             if (el === target) {
-                currShip = ship;
+                shipToBePlaced = ship;
             };
         });
     });
-    console.log(currShip);
+    console.log(shipToBePlaced);
 
     // determine isVertical
     
     // display ship on hover of player board
+    // function mouseOver(evt) {
+    //     if (evt.target.classList.contains('cell')){
+    //         evt.target.classList.add('pending');
+    //     };
+    // }
+
+    // function mouseOut(evt) {
+    //     if (evt.target.classList.contains('cell')){
+    //         evt.target.classList.remove('pending');
+    //     };
+    // }
+    // playerBoardEl.addEventListener('mouseover', mouseOver);
+    // playerBoardEl.addEventListener('mouseout', mouseOut);
     
     // add event listener on player board div
-
+    playerBoardEl.addEventListener('click', handlePlacedShip);
+    
     // take first cell of ship - left or top
 
     // check all potential cells for conflicts - sides or ships
@@ -545,7 +562,86 @@ function setShipLocationOnClick(evt) {
 
 }
 
+function handlePlacedShip(evt) {
+    // get cell clicked on player board
+    const target = evt.target;
 
+    // check that a cell was clicked
+    if (!target.classList.contains('cell')) {
+        return;
+    };
+
+    // get row and col clicked
+    const [_, row, col] = [...extractCoords(target)];
+
+    // attempt to place
+    console.log(_, row, col);
+
+    let newLocations = attemptToPlaceShip(shipToBePlaced, row, col);
+    // if valid, asign to ship. else find new starting position
+    if (newLocations) {
+        newLocations.forEach(coord => shipToBePlaced.coords.push(coord));
+        placeShipsOntoBoard();
+        for (let coord of shipToBePlaced.coords) {
+            playerBoard[coord[0]][coord[1]] = 1;
+        };
+        renderShip(shipToBePlaced, 'p');
+        playerBoardEl.removeEventListener('click', handlePlacedShip);
+        playerScoreboardEl.addEventListener('click', setShipLocationOnClick);
+    };
+
+}
+
+function attemptToPlaceShip(ship, row, col) {
+    // figure out valid starting locations. left-most position for horizontal ship, top for vertical
+
+    // get player ships
+    const ships = playerShips;
+
+    // get locations of current ships
+    const currentCoords = [];
+    ships.forEach(item => {
+        item.coords.forEach(coord => currentCoords.push(coord));
+    });
+    let maxStartingRow;
+    let maxStartingCol;
+
+    if (ship.isVertical) {
+        maxStartingRow = 9;
+        maxStartingCol = 10 - ship.size;
+    } else {
+        maxStartingRow = 10 - ship.size;
+        maxStartingCol = 9;
+    }
+    let isValid = false;
+    let potential = [];
+
+    // get potential coordinates based off of starting position, ship size, and isVertical
+    // v [0,0], [1,0]
+    // h [0,0], [0,1]
+    if (ship.isVertical) {
+        // row, col - row col + 1
+        for (let i = 0; i < ship.size; i++) {
+            potential.push([row, col + i]);
+        }
+    } else {
+        for (let i = 0; i < ship.size; i++) {
+            potential.push([row + i, col]);
+        }
+    };
+    isValid = true;
+
+    // compare current positions to potential new ones
+    potential.forEach(item => {
+        currentCoords.forEach(coord => {
+            if (item[0] === coord[0] && item[1] === coord[1]) {
+                isValid = false;
+            }
+        });
+    });
+    console.log(potential);
+    return isValid ? potential: null;
+}
 
 // gets ship coordinates from objects and adds them to the playing board
 function placeShipsOntoBoard() {
@@ -565,7 +661,9 @@ function placeShipsOntoBoard() {
 // takes cell element, returns coordinates of that cell in the board as arr. ['c', 0, 1] or ['p', 0, 1]
 // (div element)
 function extractCoords(cellEl) {
-    return cellEl.id.split('-');
+    let strs = cellEl.id.split('-');
+    let parsed = [strs[0], parseInt(strs[1]), parseInt(strs[2])]
+    return parsed;
 }
 
 // handles player turn, activated onClick of computer's grid
@@ -753,7 +851,7 @@ function renderCell(cell, change) {
     const cellEls = (player === 'p') ? playerCellEls : computerCellEls;
 
     // get index of array from id of element
-    const idx = parseInt(row) * 10 + parseInt(col);
+    const idx = row * 10 + col;
 
     // add class to inner <span>
     cellEls[idx].firstChild.classList.add(change);
