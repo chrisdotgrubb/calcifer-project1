@@ -35,9 +35,6 @@ const playerScoreboardEl = document.querySelector('#playerScoreboard');
 /*--- event listeners ---*/
 playAgainEl.addEventListener('click', playAgain);
 
-// this will need to be added after ships are placed
-// computerBoardEl.addEventListener('click', onGuess);
-
 /*--- main ---*/
 init();
 
@@ -47,6 +44,7 @@ init();
 function init() {
     winner = null;
 
+    // 0: no ship, 1: ship
     playerBoard = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -60,6 +58,7 @@ function init() {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
 
+    // 0: no ship, 1: ship
     computerBoard = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -252,6 +251,7 @@ function getScoreboardElements() {
 }
 
 // sets ship location, using for just computer
+// (computerShips[0], 'c')
 function setShipLocationRandomly(ship, player) {
     // get player or computer ships
     const ships = (player === 'p') ? playerShips : computerShips;
@@ -316,6 +316,7 @@ function setShipLocationRandomly(ship, player) {
 }
 
 // gets ship to be placed, from player scoreboard
+// (click event)
 function getShipToBePlaced(evt) {
     // get ship clicked on scoreboard display
     const target = evt.target;
@@ -357,6 +358,7 @@ function getShipToBePlaced(evt) {
 }
 
 // places shipToBePlaced onto player board
+// (click event)
 function handlePlacingShip(evt) {
     // get cell clicked on player board
     const target = evt.target;
@@ -384,12 +386,12 @@ function handlePlacingShip(evt) {
 
         // place coords in ship obj
         newLocations.forEach(coord => shipToBePlaced.coords.push(coord));
-        
+
         // place new ship onto board
         for (let coord of shipToBePlaced.coords) {
             playerBoard[coord[0]][coord[1]] = 1;
         };
-        
+
         // make ship disapear in scoreboard
         // maybe move to previous listener
         // unrenderScoreboardShip(shipToBePlaced);
@@ -411,6 +413,9 @@ function handlePlacingShip(evt) {
     };
 }
 
+// tries to place ship at location clicked
+// takes ship, row, and col. returns array of ship's new coordinates if valid, else null
+// (playerShips[0], 0, 0)
 function attemptToPlaceShip(ship, row, col) {
     // get player ships
     const ships = playerShips;
@@ -465,35 +470,6 @@ function attemptToPlaceShip(ship, row, col) {
     return isValid ? potential : null;
 }
 
-function mouseoverPendingPlacement(evt) {
-    if (evt.target.classList.contains('cell')) {
-        // get target cell
-        let coords = extractCoords(evt.target);
-        const [_, row, col] = [...coords];
-        // get pending cells
-        let cells = [];
-        let idx = row * 10 + col;
-        let adder = 10; // change when adding in isVertical / horizontal logic
-
-        for (let i=0; i < shipToBePlaced.size; i++){
-            let newIdx = i * adder + idx;
-            if (newIdx > 99) {
-                continue;
-            }
-            cells.push(playerCellEls[newIdx]);
-        }
-
-        // apply class to the cells
-        cells.forEach(cell => cell.classList.add('pending'));
-    };
-}
-
-function mouseoutPendingPlacement(evt) {
-    if (evt.target.classList.contains('cell')) {
-        playerCellEls.forEach(cell => cell.classList.remove('pending'));
-        // evt.target.classList.remove('pending');
-    };
-}
 
 // sets up computer and starts play, called after player setup
 function setupComputerBoard() {
@@ -626,19 +602,6 @@ function getHitOrMiss(coords) {
     };
 }
 
-// takes coordinate, returns ship and index of location hit.
-// (['p', 0, 0])
-function getShipAtCoord(coords) {
-    const [board, row, col] = [...coords];
-    ships = (board === 'p') ? playerShips : computerShips;
-    for (let ship of ships) {
-        for (let i = 0; i < ship.size; i++) {
-            if (ship.coords[i][0] == row && ship.coords[i][1] == col) {
-                return [ship, i]
-            }
-        }
-    };
-}
 
 // takes coordinate of hit and handles all hit logic, no return
 // (['p', 0, 0])
@@ -680,6 +643,20 @@ function handleHit(coords) {
     };
 }
 
+// takes coordinate, returns ship and index of location hit.
+// (['p', 0, 0])
+function getShipAtCoord(coords) {
+    const [board, row, col] = [...coords];
+    ships = (board === 'p') ? playerShips : computerShips;
+    for (let ship of ships) {
+        for (let i = 0; i < ship.size; i++) {
+            if (ship.coords[i][0] == row && ship.coords[i][1] == col) {
+                return [ship, i]
+            }
+        }
+    };
+}
+
 // takes coordinate of miss and handles all miss logic, no return
 // (['p', 0, 0])
 function handleMiss(coords) {
@@ -715,6 +692,33 @@ function checkWinner(player) {
 
 /*--- Rendering Functions  ---*/
 
+// takes ship object and the player as string, then renders that ship
+// (playerShips[0], 'p')
+function renderShip(ship, player) {
+    const cellEls = (player === 'p') ? playerCellEls : computerCellEls;
+    for (let coord of ship.coords) {
+        const i = coord[0] * 10 + coord[1]
+        cellEls[i].classList.add('ship');
+        cellEls[i].classList.add(ship.name);
+    };
+}
+
+// this is called after manual ship placement of each ship
+// (playerShips[0])
+function unrenderScoreboardShip(ship) {
+    for (let cell of ship.scoreboards) {
+        cell.classList.remove(`p-${ship.name}`);
+    };
+}
+
+// re-renders scoreboard ship on game start
+// (playerShips[0])
+function renderScoreboardShip(ship) {
+    for (let cell of ship.scoreboards) {
+        cell.classList.add(`p-${ship.name}`);
+    };
+}
+
 // takes cell and the change happening and applies the appropriate class to the element
 // (['p', 0 , 1], 'hit')
 function renderCell(cell, change) {
@@ -728,30 +732,6 @@ function renderCell(cell, change) {
 
     // add class to inner <span>
     cellEls[idx].firstChild.classList.add(change);
-}
-
-// takes ship object and the player as string, then renders that ship
-// (playerShips[0], 'p')
-function renderShip(ship, player) {
-    const cellEls = (player === 'p') ? playerCellEls : computerCellEls;
-    for (let coord of ship.coords) {
-        const i = coord[0] * 10 + coord[1]
-        cellEls[i].classList.add('ship');
-        cellEls[i].classList.add(ship.name);
-    };
-}
-// this is called after manual ship placement of each ship
-function unrenderScoreboardShip(ship) {
-    for (let cell of ship.scoreboards) {
-        cell.classList.remove(`p-${ship.name}`);
-    };
-}
-
-// re-renders scoreboard ship on game start
-function renderScoreboardShip(ship) {
-    for (let cell of ship.scoreboards) {
-        cell.classList.add(`p-${ship.name}`);
-    };
 }
 
 // takes player's ship that was hit and index, render's hit on the player's scoreboard.
@@ -779,4 +759,38 @@ function renderWinner() {
 
     // display play again button
     playAgainEl.classList.remove('hidden');
+}
+
+// renders potential ship location on hover of ship placement
+// (mouseover event)
+function mouseoverPendingPlacement(evt) {
+    if (evt.target.classList.contains('cell')) {
+        // get target cell
+        const coords = extractCoords(evt.target);
+        const [_, row, col] = [...coords];
+        // get pending cells
+        const cells = [];
+        const idx = row * 10 + col;
+        const adder = 10; // change when adding in isVertical / horizontal logic
+
+        for (let i = 0; i < shipToBePlaced.size; i++) {
+            let newIdx = i * adder + idx;
+            if (newIdx > 99) {
+                continue;
+            }
+            cells.push(playerCellEls[newIdx]);
+        }
+
+        // apply class to the cells
+        cells.forEach(cell => cell.classList.add('pending'));
+    };
+}
+
+// clears potential ship location when ship is placed
+// (mouseout event)
+function mouseoutPendingPlacement(evt) {
+    if (evt.target.classList.contains('cell')) {
+        playerCellEls.forEach(cell => cell.classList.remove('pending'));
+        // evt.target.classList.remove('pending');
+    };
 }
