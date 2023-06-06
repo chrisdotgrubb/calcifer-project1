@@ -344,24 +344,16 @@ function getShipToBePlaced(evt) {
     playerScoreboardEl.removeEventListener('click', getShipToBePlaced);
 
     // determine isVertical
-    
-    // display ship on hover of player board
-    // function mouseOver(evt) {
-    //     if (evt.target.classList.contains('cell')){
-    //         evt.target.classList.add('pending');
-    //     };
-    // }
 
-    // function mouseOut(evt) {
-    //     if (evt.target.classList.contains('cell')){
-    //         evt.target.classList.remove('pending');
-    //     };
-    // }
-    // playerBoardEl.addEventListener('mouseover', mouseOver);
-    // playerBoardEl.addEventListener('mouseout', mouseOut);
-    
+    // display ship on hover of player board
+    playerBoardEl.addEventListener('mouseover', mouseoverPendingPlacement);
+    playerBoardEl.addEventListener('mouseout', mouseoutPendingPlacement);
+
+    // remove ship from scoreboard
+    unrenderScoreboardShip(shipToBePlaced);
+
     // add event listener on player board div
-    playerBoardEl.addEventListener('click', handlePlacingShip);   
+    playerBoardEl.addEventListener('click', handlePlacingShip);
 }
 
 // places shipToBePlaced onto player board
@@ -384,20 +376,32 @@ function handlePlacingShip(evt) {
     if (newLocations) {
         // ship will be placed, remove this event listener
         playerBoardEl.removeEventListener('click', handlePlacingShip);
+        playerBoardEl.removeEventListener('mouseover', mouseoverPendingPlacement);
+        playerBoardEl.removeEventListener('mouseout', mouseoutPendingPlacement);
+
+        // mouseoutPendingPlacement never triggers, so remove pending class from target
+        target.classList.remove('pending');
 
         // place coords in ship obj
         newLocations.forEach(coord => shipToBePlaced.coords.push(coord));
-
+        
         // place new ship onto board
         for (let coord of shipToBePlaced.coords) {
             playerBoard[coord[0]][coord[1]] = 1;
         };
+        
+        // make ship disapear in scoreboard
+        // maybe move to previous listener
+        // unrenderScoreboardShip(shipToBePlaced);
 
         // render new ship
         renderShip(shipToBePlaced, 'p');
 
+        // remove pending from all cells
+        playerCellEls.forEach(cell => cell.classList.remove('pending'));
+
         // check if all ships have been placed
-        if (playerShips.every(ship => ship.coords.length > 0)){
+        if (playerShips.every(ship => ship.coords.length > 0)) {
             // move on with game
             setupComputerBoard();
         } else {
@@ -428,7 +432,7 @@ function attemptToPlaceShip(ship, row, col) {
         maxStartingRow = 10 - ship.size;
         maxStartingCol = 9;
     }
-    if (row > maxStartingRow || col > maxStartingCol){
+    if (row > maxStartingRow || col > maxStartingCol) {
         return null;
     }
 
@@ -458,7 +462,37 @@ function attemptToPlaceShip(ship, row, col) {
             }
         });
     });
-    return isValid ? potential: null;
+    return isValid ? potential : null;
+}
+
+function mouseoverPendingPlacement(evt) {
+    if (evt.target.classList.contains('cell')) {
+        // get target cell
+        let coords = extractCoords(evt.target);
+        const [_, row, col] = [...coords];
+        // get pending cells
+        let cells = [];
+        let idx = row * 10 + col;
+        let adder = 10; // change when adding in isVertical / horizontal logic
+
+        for (let i=0; i < shipToBePlaced.size; i++){
+            let newIdx = i * adder + idx;
+            if (newIdx > 99) {
+                continue;
+            }
+            cells.push(playerCellEls[newIdx]);
+        }
+
+        // apply class to the cells
+        cells.forEach(cell => cell.classList.add('pending'));
+    };
+}
+
+function mouseoutPendingPlacement(evt) {
+    if (evt.target.classList.contains('cell')) {
+        playerCellEls.forEach(cell => cell.classList.remove('pending'));
+        // evt.target.classList.remove('pending');
+    };
 }
 
 // sets up computer and starts play, called after player setup
@@ -469,6 +503,9 @@ function setupComputerBoard() {
     // place computer ships onto computerBoard
     // this is doing both players, may change since player's will already be done
     placeShipsOntoBoard();
+
+    // add ships back to player's scoreboard
+    playerShips.forEach(ship => renderScoreboardShip(ship));
 
     // add event listener to start game
     computerBoardEl.addEventListener('click', onGuess)
@@ -701,6 +738,19 @@ function renderShip(ship, player) {
         const i = coord[0] * 10 + coord[1]
         cellEls[i].classList.add('ship');
         cellEls[i].classList.add(ship.name);
+    };
+}
+// this is called after manual ship placement of each ship
+function unrenderScoreboardShip(ship) {
+    for (let cell of ship.scoreboards) {
+        cell.classList.remove(`p-${ship.name}`);
+    };
+}
+
+// re-renders scoreboard ship on game start
+function renderScoreboardShip(ship) {
+    for (let cell of ship.scoreboards) {
+        cell.classList.add(`p-${ship.name}`);
     };
 }
 

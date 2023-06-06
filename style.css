@@ -50,7 +50,7 @@ nav > * {
 }
 
 .ship {
-    background-color: grey;
+    /* background-color: grey; */
     border-radius: 20%;
 }
 
@@ -94,6 +94,10 @@ nav > * {
 
 .sunk {
     background: linear-gradient(yellow, orange, red, red);
+}
+
+.pending {
+    background-color: yellowgreen;
 }
 
 #game {
