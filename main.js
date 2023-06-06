@@ -373,7 +373,7 @@ function initWhenPlacingShipsWithEventListener() {
     getScoreboardElements();
 
     // allow for placing ships
-    playerScoreboardEl.addEventListener('click', setShipLocationOnClick);
+    playerScoreboardEl.addEventListener('click', getShipToBePlaced);
 
     // then after player ships are placed, finish the setup
 
@@ -505,7 +505,8 @@ function setShipLocationRandomly(ship, player) {
     potential.forEach(coord => ship.coords.push(coord));
 }
 
-function setShipLocationOnClick(evt) {
+// gets ship to be placed, from player scoreboard
+function getShipToBePlaced(evt) {
     // get ship clicked on scoreboard display
     const target = evt.target;
 
@@ -513,9 +514,6 @@ function setShipLocationOnClick(evt) {
     if (!target.classList.contains('ship')) {
         return;
     };
-
-    // remove ship event listeners
-    playerScoreboardEl.removeEventListener('click', setShipLocationOnClick);
 
     // select ship to be placed, only player ships will use this function
     // loop over ships to see which ship's scoreboard element was clicked
@@ -526,6 +524,14 @@ function setShipLocationOnClick(evt) {
             };
         });
     });
+
+    // checks to see if clicked ship has already been placed
+    if (shipToBePlaced.coords.length > 0) {
+        return;
+    }
+
+    // remove ship event listeners
+    playerScoreboardEl.removeEventListener('click', getShipToBePlaced);
     console.log(shipToBePlaced);
 
     // determine isVertical
@@ -546,23 +552,11 @@ function setShipLocationOnClick(evt) {
     // playerBoardEl.addEventListener('mouseout', mouseOut);
     
     // add event listener on player board div
-    playerBoardEl.addEventListener('click', handlePlacedShip);
-    
-    // take first cell of ship - left or top
-
-    // check all potential cells for conflicts - sides or ships
-
-    // place coords in ship
-
-    // add ship to board to be able to check for future conflicts
-
-    // remove board event listener
-
-    // if remaining ship, add ship event listener, else proceed with initiation of game
-
+    playerBoardEl.addEventListener('click', handlePlacingShip);   
 }
 
-function handlePlacedShip(evt) {
+// places shipToBePlaced onto player board
+function handlePlacingShip(evt) {
     // get cell clicked on player board
     const target = evt.target;
 
@@ -580,16 +574,29 @@ function handlePlacedShip(evt) {
     let newLocations = attemptToPlaceShip(shipToBePlaced, row, col);
     // if valid, asign to ship. else find new starting position
     if (newLocations) {
+        // ship will be placed, remove this event listener
+        playerBoardEl.removeEventListener('click', handlePlacingShip);
+
+        // place coords in ship obj
         newLocations.forEach(coord => shipToBePlaced.coords.push(coord));
-        placeShipsOntoBoard();
+
+        // place new ship onto board
         for (let coord of shipToBePlaced.coords) {
             playerBoard[coord[0]][coord[1]] = 1;
         };
-        renderShip(shipToBePlaced, 'p');
-        playerBoardEl.removeEventListener('click', handlePlacedShip);
-        playerScoreboardEl.addEventListener('click', setShipLocationOnClick);
-    };
 
+        // render new ship
+        renderShip(shipToBePlaced, 'p');
+
+        // check if all ships have been placed
+        if (playerShips.every(ship => ship.coords.length > 0)){
+            // move on with game
+            setupComputerBoard();
+        } else {
+            // or allow for placing other ships
+            playerScoreboardEl.addEventListener('click', getShipToBePlaced);
+        };
+    };
 }
 
 function attemptToPlaceShip(ship, row, col) {
@@ -613,6 +620,10 @@ function attemptToPlaceShip(ship, row, col) {
         maxStartingRow = 10 - ship.size;
         maxStartingCol = 9;
     }
+    if (row > maxStartingRow || col > maxStartingCol){
+        return null;
+    }
+
     let isValid = false;
     let potential = [];
 
@@ -701,6 +712,19 @@ function onGuess(evt) {
         // add setTimeout before computer takes turn, and change display message
         computerTurn();
     };
+}
+
+// sets up computer and starts play, called after player setup
+function setupComputerBoard() {
+    // set computer ships locations
+    computerShips.forEach(ship => setShipLocationRandomly(ship, 'c'));
+
+    // place computer ships onto computerBoard
+    // this is doing both players, may change since player's will already be done
+    placeShipsOntoBoard();
+
+    // add event listener to start game
+    computerBoardEl.addEventListener('click', onGuess)
 }
 
 // handle computer's turn
