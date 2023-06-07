@@ -580,7 +580,25 @@ function onGuess(evt) {
 // triggered after player's turn, but could be called first if computer gets first turn
 function computerTurn() {
     // pick cell
-    const coords = getRandomGuess();
+    let coords;
+
+    // check if unresolved hits
+    // if true check around hits for empty space
+    if (computerKnowledge.unresolvedHits.length > 0) {
+        let potentialCells = [];
+        computerKnowledge.unresolvedHits.forEach(hit => {
+            let cells = getPontentialGuessCells(hit[0], hit[1])
+            potentialCells = potentialCells.concat(cells);
+        });
+        let randCell = potentialCells[Math.floor(Math.random() * potentialCells.length)];
+        coords = ['p', randCell[0], randCell[1]];
+    } else {
+        coords = getRandomGuess();
+    }
+
+    // get best available location
+
+    // else random
 
     // check if hit or miss
     const isHit = getHitOrMiss(coords);
@@ -658,8 +676,8 @@ function getComputerGuess() {
         // don't guess in space that a remaining ship could not occupy
 }
 
-// gets computer guess
-function getGuess(row, col) {
+// gets cells next to a hit, that haven't been guessed
+function getPontentialGuessCells(row, col) {
     let adjacentCells = [null, null, null, null];
 
     // see if already guessed
@@ -687,20 +705,23 @@ function getGuess(row, col) {
     };
 
     // get number of open cells
-    let numOfPotentialsGuesses = adjacentGuesses.reduce((acc, curr) => {
-        if (curr === 0) {
-            return acc + 1;
-        }
-        return acc;
-    }, 0);
+    // let numOfPotentialsGuesses = adjacentGuesses.reduce((acc, curr) => {
+    //     if (curr === 0) {
+    //         return acc + 1;
+    //     }
+    //     return acc;
+    // }, 0);
 
     let cells = [];
-    adjacentCells.forEach(cell => {
+    adjacentCells.forEach((cell, i) => {
         if (cell) {
-            cells.push(cell);
+            if (adjacentGuesses[i] === 0) {
+                cells.push(cell);
+            }
         };
     });
-    return cells[Math.floor(Math.random() * cells.length)];
+
+    return cells;
 }
 
 // updates computer's knowledge after hit
@@ -712,10 +733,9 @@ function updateKnowledge(ship, row, col) {
         // check if hits.length is same as ship.size
         let sunkShipLength = ship.size;
         ships.forEach(item => sunkShipLength += item.size);
-
         // if all hits are accounted for by sunk ships, resolve both hits and ships
         if (hits.length + 1 === sunkShipLength) {
-            hits = [];
+            computerKnowledge.unresolvedHits = [];
             ship.isResolved = true;
         } else {
             // else add hit and ship to unresolved
