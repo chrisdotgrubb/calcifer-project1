@@ -1,5 +1,6 @@
 /*--- const ---*/
 const setupMsg = 'Place your ships';
+const rotateMsg = '[Space] to rotate';
 const playerMsg = 'Your turn';
 const computerMsg = 'Computer\'s turn';
 const winningMsg = 'Congrats, you won!';
@@ -269,11 +270,12 @@ function setShipLocationRandomly(ship, player) {
     let maxStartingCol;
 
     if (ship.isVertical) {
-        maxStartingRow = 9;
-        maxStartingCol = 11 - ship.size;
-    } else {
+
         maxStartingRow = 11 - ship.size;
         maxStartingCol = 9;
+    } else {
+        maxStartingRow = 9;
+        maxStartingCol = 11 - ship.size;
     }
     let isValid = false;
     let potential = [];
@@ -291,11 +293,11 @@ function setShipLocationRandomly(ship, player) {
         if (ship.isVertical) {
             // row, col - row col + 1
             for (let i = 0; i < ship.size; i++) {
-                potential.push([row, col + i]);
+                potential.push([row + i, col]);
             }
         } else {
             for (let i = 0; i < ship.size; i++) {
-                potential.push([row + i, col]);
+                potential.push([row, col + i]);
             }
         };
         isValid = true;
@@ -312,7 +314,6 @@ function setShipLocationRandomly(ship, player) {
 
     // if valid, asign to ship. else find new starting position
     potential.forEach(coord => ship.coords.push(coord));
-    renderShip(ship, player)
 }
 
 // gets ship to be placed, from player scoreboard
@@ -344,7 +345,11 @@ function getShipToBePlaced(evt) {
     // remove ship event listeners
     playerScoreboardEl.removeEventListener('click', getShipToBePlaced);
 
-    // determine isVertical
+    // change display message
+    turnEl.innerText = rotateMsg;
+
+    // add event listener to change isVertical
+    window.addEventListener('keydown', changeIsVertical);
 
     // display ship on hover of player board
     playerBoardEl.addEventListener('mouseover', mouseoverPendingPlacement);
@@ -392,9 +397,8 @@ function handlePlacingShip(evt) {
             playerBoard[coord[0]][coord[1]] = 1;
         };
 
-        // make ship disapear in scoreboard
-        // maybe move to previous listener
-        // unrenderScoreboardShip(shipToBePlaced);
+        // reset display message
+        turnEl.innerText = setupMsg;
 
         // render new ship
         renderShip(shipToBePlaced, 'p');
@@ -469,7 +473,6 @@ function attemptToPlaceShip(ship, row, col) {
     });
     return isValid ? potential : null;
 }
-
 
 // sets up computer and starts play, called after player setup
 function setupComputerBoard() {
@@ -771,13 +774,18 @@ function mouseoverPendingPlacement(evt) {
         // get pending cells
         const cells = [];
         const idx = row * 10 + col;
-        const adder = (shipToBePlaced.isVertical) ? 10: 1; // change when adding in isVertical / horizontal logic
+        const adder = (shipToBePlaced.isVertical) ? 10 : 1; // change when adding in isVertical / horizontal logic
 
         for (let i = 0; i < shipToBePlaced.size; i++) {
             let newIdx = i * adder + idx;
             if (newIdx > 99) {
                 continue;
-            }
+            };
+            if (!shipToBePlaced.isVertical && cells.length > 0) {
+                if (newIdx > row * 10 + 9) {
+                    continue;
+                };
+            };
             cells.push(playerCellEls[newIdx]);
         }
 
@@ -791,6 +799,26 @@ function mouseoverPendingPlacement(evt) {
 function mouseoutPendingPlacement(evt) {
     if (evt.target.classList.contains('cell')) {
         playerCellEls.forEach(cell => cell.classList.remove('pending'));
-        // evt.target.classList.remove('pending');
+    };
+}
+
+// toggles vertical and horizontal placement of new ship
+// (keydown event)
+function changeIsVertical(evt) {
+    console.log(evt.key);
+    if (evt.key === ' ') {
+        // toggle true/false
+        shipToBePlaced.isVertical = !shipToBePlaced.isVertical;
+
+        // remove hover event listener
+        // playerBoardEl.removeEventListener('mouseover', mouseoverPendingPlacement);
+
+        // remove all pending squares
+        // playerCellEls.forEach(cell => cell.classList.remove('pending'));
+
+        // add pending squares to new orientation to display change before moving over another cell
+
+        // re-add event listener to take over on moving cells
+        // playerBoardEl.addEventListener('mouseover', mouseoverPendingPlacement);
     };
 }
