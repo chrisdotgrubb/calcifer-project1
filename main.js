@@ -586,12 +586,54 @@ function computerTurn() {
     // if true check around hits for empty space
     if (computerKnowledge.unresolvedHits.length > 0) {
         let potentialCells = [];
+        let newChoices = [];
+
         computerKnowledge.unresolvedHits.forEach(hit => {
             let cells = getPontentialGuessCells(hit[0], hit[1])
             potentialCells = potentialCells.concat(cells);
         });
-        let randCell = potentialCells[Math.floor(Math.random() * potentialCells.length)];
-        coords = ['p', randCell[0], randCell[1]];
+        let cellChoice;
+        
+        if (computerKnowledge.unresolvedHits.length > 1) {
+            let commonRowOrCol = [];
+            let rowIdxs = [];
+            let colIdxs = [];
+            let isRow;
+            let commonIdx;
+
+            computerKnowledge.unresolvedHits.forEach(c => {
+                rowIdxs.push(c[0]);
+                colIdxs.push(c[1]);
+            })
+
+            isRow = rowIdxs.every(r => r === rowIdxs[0]);
+
+            if (isRow) {
+                commonIdx = rowIdxs[0];
+                potentialCells.forEach(c => {
+                    if (c[0] === commonIdx) {
+                        newChoices.push(c);
+                    };
+                });
+            } else {
+                commonIdx = colIdxs[0];
+                potentialCells.forEach(c => {
+                    if (c[1] === commonIdx) {
+                        newChoices.push(c);
+                    };
+                });
+            };
+        }
+        
+        if (newChoices.length > 0) {
+            potentialCells = newChoices;
+        };
+
+        // if nothing else, random guess
+        if (!cellChoice) {
+            cellChoice = potentialCells[Math.floor(Math.random() * potentialCells.length)];
+        };
+        coords = ['p', cellChoice[0], cellChoice[1]];
     } else {
         coords = getRandomGuess();
     }
