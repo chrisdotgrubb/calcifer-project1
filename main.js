@@ -112,7 +112,8 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null
+            isResolved: null,
+            potentialCoords: []
         },
         {
             name: 'battleship',
@@ -123,7 +124,8 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null
+            isResolved: null,
+            potentialCoords: []
         },
         {
             name: 'cruiser',
@@ -134,7 +136,8 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null
+            isResolved: null,
+            potentialCoords: []
         },
         {
             name: 'submarine',
@@ -145,7 +148,8 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null
+            isResolved: null,
+            potentialCoords: []
         },
         {
             name: 'destroyer',
@@ -156,7 +160,8 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null
+            isResolved: null,
+            potentialCoords: []
         }
     ];
 
@@ -575,7 +580,7 @@ function onGuess(evt) {
 // triggered after player's turn, but could be called first if computer gets first turn
 function computerTurn() {
     // pick cell
-    const coords = getComputerGuess();
+    const coords = getRandomGuess();
 
     // check if hit or miss
     const isHit = getHitOrMiss(coords);
@@ -592,13 +597,24 @@ function computerTurn() {
     };
 }
 
+// returns random guess, when no hits are known
+function getRandomGuess() {
+    while (true) {
+        const row = Math.floor(Math.random() * 10);
+        const col = Math.floor(Math.random() * 10);
+        if (!computerGuesses[row][col]) {
+            return ['p', row, col];
+        };
+    };
+}
+
+
 // returns cell for computer's guess
 function getComputerGuess() {
     let guess;
     let hits = computerKnowledge.unresolvedHits;
     let ships = playerShips.filter(item => item.isResolved === false);
-
-    /* // picks logically
+    // picks logically
     // no hits on unsunk ships, choose (semi)randomly
     if (hits.length === 0) {
         while (true) {
@@ -609,37 +625,37 @@ function getComputerGuess() {
             };
         };
     };
+
     // if there is a hit on a floating ship, chose adjacent cell
     // get most recent hit
     let prev = hits.slice(-1)[0];
+
+
+    // this fails when all cells adjacent to last hit are taken. need to then go to another previous hit.
     while (true) {
+        // if one hit unresolved
         if (hits.length === 1) {
             let cell = getGuess(prev[0], prev[1]);
-            return ['p', cell[0], cell[1]];
+            if (!computerGuesses[cell[0]][cell[1]]) {
+                return ['p', cell[0], cell[1]];
+            };
+        // if more than one unresolved hit (same as above for now)
+        } else if (hits.length > 1){
+            let cell = getGuess(prev[0], prev[1]);
+            if (!computerGuesses[cell[0]][cell[1]]) {
+                return ['p', cell[0], cell[1]];
+            };
         } else {
             break;
         };
-
+    };
         // check guesses to see if another hit is adjacent
 
         // if no adjacent cell is valid, choose previous hit in hits
 
-
-
         // if there are 2 such hits, guess in same row/col
 
         // don't guess in space that a remaining ship could not occupy
-    }
-    */
-
-    // picks randomly
-    while (true) {
-        const row = Math.floor(Math.random() * 10);
-        const col = Math.floor(Math.random() * 10);
-        if (!computerGuesses[row][col]) {
-            return ['p', row, col];
-        };
-    };
 }
 
 // gets computer guess
@@ -648,25 +664,26 @@ function getGuess(row, col) {
 
     // see if already guessed
     let adjacentGuesses = [0, 0, 0, 0]
+
     // get cell above
     if (row > 0) {
-        adjacentCells[0] = [col - 1, row];
-        adjacentGuesses[0] = computerGuesses[col - 1][row];
+        adjacentCells[0] = [row - 1, col];
+        adjacentGuesses[0] = computerGuesses[row - 1][col];
     }
     // get cell below
     if (row < 9) {
-        adjacentCells[1] = [col + 1, row];
-        adjacentGuesses[1] = computerGuesses[col + 1][row];
+        adjacentCells[1] = [row + 1, col];
+        adjacentGuesses[1] = computerGuesses[row + 1][col];
     }
     // get cell left
     if (col > 0) {
-        adjacentCells[2] = [col, row - 1];
-        adjacentGuesses[2] = computerGuesses[col][row - 1];
+        adjacentCells[2] = [row, col - 1];
+        adjacentGuesses[2] = computerGuesses[row][col - 1];
     }
     // get cell right
     if (col < 9) {
-        adjacentCells[3] = [col, row + 1];
-        adjacentGuesses[3] = computerGuesses[col][row + 1];
+        adjacentCells[3] = [row, col + 1];
+        adjacentGuesses[3] = computerGuesses[row][col + 1];
     };
 
     // get number of open cells
@@ -685,6 +702,7 @@ function getGuess(row, col) {
     });
     return cells[Math.floor(Math.random() * cells.length)];
 }
+
 // updates computer's knowledge after hit
 function updateKnowledge(ship, row, col) {
     let hits = computerKnowledge.unresolvedHits;
