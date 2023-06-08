@@ -212,7 +212,7 @@ function init() {
     computerKnowledge = {
         // stores hits that may have a ship next to it
         unresolvedHits: []
-    }
+    };
     // stores scoreboard elements in ship.scoreboards array. needs done after ship objects created.
     getScoreboardElements();
 
@@ -324,7 +324,7 @@ function setShipLocationRandomly(ship, player) {
             currentCoords.forEach(coord => {
                 if (item[0] === coord[0] && item[1] === coord[1]) {
                     isValid = false;
-                }
+                };
             });
         });
     };
@@ -473,11 +473,11 @@ function attemptToPlaceShip(ship, row, col) {
         // row, col - row col + 1
         for (let i = 0; i < ship.size; i++) {
             potential.push([row + i, col]);
-        }
+        };
     } else {
         for (let i = 0; i < ship.size; i++) {
             potential.push([row, col + i]);
-        }
+        };
     };
 
     // compare current positions to potential new ones
@@ -528,7 +528,7 @@ function placeShipsOntoBoard() {
 // (div element)
 function extractCoords(cellEl) {
     let strs = cellEl.id.split('-');
-    let parsed = [strs[0], parseInt(strs[1]), parseInt(strs[2])]
+    let parsed = [strs[0], parseInt(strs[1]), parseInt(strs[2])];
     return parsed;
 }
 
@@ -536,7 +536,7 @@ function extractCoords(cellEl) {
 // (click event)
 function onGuess(evt) {
     // get cell clicked
-    const target = evt.target
+    const target = evt.target;
 
     // check if actual cell
     if (!(target.classList.contains('cell'))) return;
@@ -623,12 +623,6 @@ function computerTurn() {
                 };
             };
 
-
-            // if (rowIdxs.length === 0) {
-            //     rowIdxs = tempRowIdxs;
-            //     colIdxs = tempColIdxs;
-            // }
-
             // check if cells all have row in common to determin if rows or cols is better guess
             isRow = rowIdxs.every(r => r === rowIdxs[0]);
 
@@ -659,7 +653,7 @@ function computerTurn() {
 
     } else {
         coords = getBetterRandomGuess();
-    }
+    };
 
     // check if hit or miss
     const isHit = getHitOrMiss(coords);
@@ -699,7 +693,7 @@ function getBetterRandomGuess() {
 
     // get cells next to guessed cells
     guessedCells.forEach(cell => {
-        let [row, col] = [...cell]
+        let [row, col] = [...cell];
 
         // get cell above
         if (row > 0) {
@@ -726,10 +720,10 @@ function getBetterRandomGuess() {
     availableCellsOne.forEach(cell => {
         let [row, col] = [...cell];
         let isAdjacent = [...adjacendToGuessed].some(item => {
-            return item[0] === row && item[1] === col
+            return item[0] === row && item[1] === col;
         });
         if (!isAdjacent) {
-            availableCellsTwo.push(cell)
+            availableCellsTwo.push(cell);
         };
     });
 
@@ -746,7 +740,7 @@ function getPontentialGuessCells(row, col) {
     let adjacentCells = [null, null, null, null];
 
     // see if already guessed
-    let adjacentGuesses = [0, 0, 0, 0]
+    let adjacentGuesses = [0, 0, 0, 0];
 
     // get cell above
     if (row > 0) {
@@ -774,7 +768,7 @@ function getPontentialGuessCells(row, col) {
         if (cell) {
             if (adjacentGuesses[i] === 0) {
                 cells.push(cell);
-            }
+            };
         };
     });
 
@@ -805,7 +799,7 @@ function updateKnowledge(ship, row, col) {
             let hitCounter = {
                 hit: 0,
                 miss: 0
-            }
+            };
 
             computerKnowledge.unresolvedHits.forEach(item => {
 
@@ -815,7 +809,7 @@ function updateKnowledge(ship, row, col) {
                         hitCounter.hit++;
                     } else {
                         hitCounter.miss++;
-                    }
+                    };
                 }
                 // check if hit below
                 if (row < 9) {
@@ -823,7 +817,7 @@ function updateKnowledge(ship, row, col) {
                         hitCounter.hit++;
                     } else {
                         hitCounter.miss++;
-                    }
+                    };
                 }
                 // check if hit left
                 if (col > 0) {
@@ -831,7 +825,7 @@ function updateKnowledge(ship, row, col) {
                         hitCounter.hit++;
                     } else {
                         hitCounter.miss++;
-                    }
+                    };
                 }
                 // check if hit right
                 if (col < 9) {
@@ -839,7 +833,7 @@ function updateKnowledge(ship, row, col) {
                         hitCounter.hit++;
                     } else {
                         hitCounter.miss++;
-                    }
+                    };
                 };
             });
             if (hitCounter.hit === 1) {
@@ -938,7 +932,7 @@ function getShipAtCoord(coords) {
     for (let ship of ships) {
         for (let i = 0; i < ship.size; i++) {
             if (ship.coords[i][0] == row && ship.coords[i][1] == col) {
-                return [ship, i]
+                return [ship, i];
             };
         };
     };
@@ -1077,7 +1071,7 @@ function mouseoverPendingPlacement(evt) {
                 };
             };
             cells.push(playerCellEls[newIdx]);
-        }
+        };
 
         // apply class to the cells
         cells.forEach(cell => cell.classList.add('pending'));
@@ -1124,7 +1118,7 @@ function changeIsVertical(evt) {
                 };
             };
             cells.push(playerCellEls[newIdx]);
-        }
+        };
 
         // apply class to the cells
         cells.forEach(cell => cell.classList.add('pending'));
