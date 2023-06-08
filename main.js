@@ -588,30 +588,62 @@ function computerTurn() {
         });
 
         if (computerKnowledge.unresolvedHits.length > 1) {
+            let tempRowIdxs = [];
+            let tempColIdxs = [];
             let rowIdxs = [];
             let colIdxs = [];
             let isRow;
             let commonIdx;
+            let finalHits = [];
 
-            computerKnowledge.unresolvedHits.forEach(c => {
-                rowIdxs.push(c[0]);
-                colIdxs.push(c[1]);
-            })
+            // get all unresolved hits
+            computerKnowledge.unresolvedHits.forEach(cell => {
+                tempRowIdxs.push(cell[0]);
+                tempColIdxs.push(cell[1]);
+            });
+            // get all final hits
+            playerShips.forEach(ship => {
+                if (ship.finalHit) {
+                    finalHits.push([ship.finalHit[0], ship.finalHit[1]]);
+                };
+            });
+            
+            // check if coord is a final hit and exclude from search for indexes
+            for (let i=0; i < tempRowIdxs.length; i++) {
+                let check = true;
+                finalHits.forEach(hit => {
+                    // check each pair to see if they are a final hit on a ship
+                    if (tempRowIdxs[i] === hit[0] && tempColIdxs[i] === hit[1]) {
+                        check = false;
+                    };
+                });
+                if (check) {
+                    rowIdxs.push(tempRowIdxs[i]);
+                    colIdxs.push(tempColIdxs[i]);
+                };
+            };
 
+
+            // if (rowIdxs.length === 0) {
+            //     rowIdxs = tempRowIdxs;
+            //     colIdxs = tempColIdxs;
+            // }
+
+            // check if cells all have row in common to determin if rows or cols is better guess
             isRow = rowIdxs.every(r => r === rowIdxs[0]);
 
             if (isRow) {
                 commonIdx = rowIdxs[0];
-                potentialCells.forEach(c => {
-                    if (c[0] === commonIdx) {
-                        newChoices.push(c);
+                potentialCells.forEach(cell => {
+                    if (cell[0] === commonIdx) {
+                        newChoices.push(cell);
                     };
                 });
             } else {
                 commonIdx = colIdxs[0];
-                potentialCells.forEach(c => {
-                    if (c[1] === commonIdx) {
-                        newChoices.push(c);
+                potentialCells.forEach(cell => {
+                    if (cell[1] === commonIdx) {
+                        newChoices.push(cell);
                     };
                 });
             };
@@ -758,10 +790,83 @@ function updateKnowledge(ship, row, col) {
         // check if hits.length is same as ship.size
         let sunkShipLength = ship.size;
         ships.forEach(item => sunkShipLength += item.size);
+
         // if all hits are accounted for by sunk ships, resolve both hits and ships
         if (hits.length + 1 === sunkShipLength) {
             computerKnowledge.unresolvedHits = [];
             ship.isResolved = true;
+
+        // ship is sunk, but there are more unresolved hits, than the ship's size
+        // check if the hit has more than one adjacent hits
+        // if not, ship can be resolved
+        // can only make it to this point if there is at least hit on a floating ship
+        } else if (hits.length + 1 > sunkShipLength) {
+            // check if final hit is next to more than one hit first
+            let hitCounter = {
+                hit: 0,
+                miss: 0
+            }
+
+            // check if hit above
+            if (row > 0) {
+                if (computerGuesses[row - 1][col] === 1) {
+                    hitCounter.hit++;
+                } else {
+                    hitCounter.miss++;
+                }
+            }
+            // check if hit below
+            if (row < 9) {
+                if (computerGuesses[row + 1][col] === 1) {
+                    hitCounter.hit++;
+                } else {
+                    hitCounter.miss++;
+                }
+            }
+            // check if hit left
+            if (col > 0) {
+                if (computerGuesses[row][col - 1] === 1) {
+                    hitCounter.hit++;
+                } else {
+                    hitCounter.miss++;
+                }
+            }
+            // check if hit right
+            if (col < 9) {
+                if (computerGuesses[row][col + 1] === 1) {
+                    hitCounter.hit++;
+                } else {
+                    hitCounter.miss++;
+                }
+            };
+            
+            if (hitCounter.hit === 1) {
+
+                // if so.. else, push and set resolved to false
+                // remove ship's coords from unresolved
+                let remainingUnresolvedHits = [];
+                computerKnowledge.unresolvedHits.forEach(item => {
+                    let check = true;
+                    ship.coords.forEach(coord => {
+                        if (item[0] === coord[0] && item[1] === coord[1]) {
+                            check = false;
+                        };
+                    });
+                    if (check) {
+                        remainingUnresolvedHits.push(item);
+                    };
+                });
+                computerKnowledge.unresolvedHits = remainingUnresolvedHits;
+
+                // resolve ship
+                ship.isResolved = true;
+
+                //more than one hit around final hit means the exact position may not be able to be determined
+            } else {
+                hits.push([row, col]);
+                ship.isResolved = false;
+            }
+
         } else {
             // else add hit and ship to unresolved
             hits.push([row, col]);
