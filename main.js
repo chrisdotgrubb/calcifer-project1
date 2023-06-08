@@ -721,7 +721,11 @@ function getBetterRandomGuess() {
         };
     });
 
-    let guessToTry = availableCellsTwo[Math.floor(Math.random() * availableCellsTwo.length)];
+    // check if availableCellsTow still has items, else use the previous list
+    let remainingCells = (availableCellsTwo.length > 0)? availableCellsTwo: availableCellsOne;
+
+    // get random guess from remaining available cells
+    let guessToTry = remainingCells[Math.floor(Math.random() * remainingCells.length)];
     return ['p', guessToTry[0], guessToTry[1]];
 
     // if still have guesses left, narrow down further, else get random guess from previous array
