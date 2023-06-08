@@ -550,10 +550,10 @@ function onGuess(evt) {
         // cell has already been guessed
         return;
     };
-    
+
     // remove event listener to prepare for win or computer's turn
     computerBoardEl.removeEventListener('click', onGuess);
-    
+
     // check if hit or miss
     const isHit = getHitOrMiss(coords);
 
@@ -607,9 +607,9 @@ function computerTurn() {
                     finalHits.push([ship.finalHit[0], ship.finalHit[1]]);
                 };
             });
-            
+
             // check if coord is a final hit and exclude from search for indexes
-            for (let i=0; i < tempRowIdxs.length; i++) {
+            for (let i = 0; i < tempRowIdxs.length; i++) {
                 let check = true;
                 finalHits.forEach(hit => {
                     // check each pair to see if they are a final hit on a ship
@@ -734,7 +734,7 @@ function getBetterRandomGuess() {
     });
 
     // check if availableCellsTow still has items, else use the previous list
-    let remainingCells = (availableCellsTwo.length > 0)? availableCellsTwo: availableCellsOne;
+    let remainingCells = (availableCellsTwo.length > 0) ? availableCellsTwo : availableCellsOne;
 
     // get random guess from remaining available cells
     let guessToTry = remainingCells[Math.floor(Math.random() * remainingCells.length)];
@@ -796,10 +796,10 @@ function updateKnowledge(ship, row, col) {
             computerKnowledge.unresolvedHits = [];
             ship.isResolved = true;
 
-        // ship is sunk, but there are more unresolved hits, than the ship's size
-        // check if the hit has more than one adjacent hits
-        // if not, ship can be resolved
-        // can only make it to this point if there is at least hit on a floating ship
+            // ship is sunk, but there are more unresolved hits, than the ship's size
+            // check if the hit has more than one adjacent hits
+            // if not, ship can be resolved
+            // can only make it to this point if there is at least hit on a floating ship
         } else if (hits.length + 1 > sunkShipLength) {
             // check if final hit is next to more than one hit first
             let hitCounter = {
@@ -807,39 +807,41 @@ function updateKnowledge(ship, row, col) {
                 miss: 0
             }
 
-            // check if hit above
-            if (row > 0) {
-                if (computerGuesses[row - 1][col] === 1) {
-                    hitCounter.hit++;
-                } else {
-                    hitCounter.miss++;
+            computerKnowledge.unresolvedHits.forEach(item => {
+
+                // check how many unresolved hits around the hit
+                if (row > 0) {
+                    if (item[0] === row - 1 && item[1] === col) {
+                        hitCounter.hit++;
+                    } else {
+                        hitCounter.miss++;
+                    }
                 }
-            }
-            // check if hit below
-            if (row < 9) {
-                if (computerGuesses[row + 1][col] === 1) {
-                    hitCounter.hit++;
-                } else {
-                    hitCounter.miss++;
+                // check if hit below
+                if (row < 9) {
+                    if (item[0] === row + 1 && item[1] === col) {
+                        hitCounter.hit++;
+                    } else {
+                        hitCounter.miss++;
+                    }
                 }
-            }
-            // check if hit left
-            if (col > 0) {
-                if (computerGuesses[row][col - 1] === 1) {
-                    hitCounter.hit++;
-                } else {
-                    hitCounter.miss++;
+                // check if hit left
+                if (col > 0) {
+                    if (item[0] === row && item[1] === col - 1) {
+                        hitCounter.hit++;
+                    } else {
+                        hitCounter.miss++;
+                    }
                 }
-            }
-            // check if hit right
-            if (col < 9) {
-                if (computerGuesses[row][col + 1] === 1) {
-                    hitCounter.hit++;
-                } else {
-                    hitCounter.miss++;
-                }
-            };
-            
+                // check if hit right
+                if (col < 9) {
+                    if (item[0] === row && item[1] === col + 1) {
+                        hitCounter.hit++;
+                    } else {
+                        hitCounter.miss++;
+                    }
+                };
+            });
             if (hitCounter.hit === 1) {
 
                 // if so.. else, push and set resolved to false
@@ -900,7 +902,7 @@ function handleHit(coords) {
     const [board, row, col] = [...coords];
 
     // update playerGuesses or computerGuesses
-    const guesses = (board === 'p') ? computerGuesses: playerGuesses;
+    const guesses = (board === 'p') ? computerGuesses : playerGuesses;
     guesses[row][col] = 1;
 
     // get ship that was hit
