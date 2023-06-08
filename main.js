@@ -940,7 +940,7 @@ function renderWinner() {
     // display play again button
     playAgainEl.classList.remove('hidden');
 }
-
+let hoverTarget;
 // renders potential ship location on hover of ship placement
 // (mouseover event)
 function mouseoverPendingPlacement(evt) {
@@ -948,6 +948,7 @@ function mouseoverPendingPlacement(evt) {
         // get target cell
         const coords = extractCoords(evt.target);
         const [_, row, col] = [...coords];
+        hoverTarget = [row, col];
 
         // get pending cells
         const cells = [];
@@ -990,5 +991,35 @@ function changeIsVertical(evt) {
     if (evt.key === ' ') {
         // toggle true/false
         shipToBePlaced.isVertical = !shipToBePlaced.isVertical;
+
+        // remove pending
+        playerCellEls.forEach(cell => cell.classList.remove('pending'));
+
+        // reset pending with new direction
+        let [row, col] = [...hoverTarget];
+        // get pending cells
+        const cells = [];
+        const idx = row * 10 + col;
+        const adder = (shipToBePlaced.isVertical) ? 10 : 1;
+
+        // prevent out of index and visual wrapping
+        for (let i = 0; i < shipToBePlaced.size; i++) {
+            let newIdx = i * adder + idx;
+            // checks to see if vertical ship is too close to bottom
+            if (newIdx > 99) {
+                continue;
+            };
+
+            // checks to see if horizontal ship is too close to edge
+            if (!shipToBePlaced.isVertical && cells.length > 0) {
+                if (newIdx > row * 10 + 9) {
+                    continue;
+                };
+            };
+            cells.push(playerCellEls[newIdx]);
+        }
+
+        // apply class to the cells
+        cells.forEach(cell => cell.classList.add('pending'));
     };
 }
