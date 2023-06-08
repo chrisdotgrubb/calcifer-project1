@@ -1,5 +1,5 @@
 /*--- const ---*/
-const setupMsg = 'Place your ships';
+const setupMsg = 'Click a ship to place';
 const rotateMsg = '[Space] to rotate';
 const playerMsg = 'Your turn';
 const computerMsg = 'Computer\'s turn';
@@ -589,11 +589,11 @@ function computerTurn() {
         let newChoices = [];
 
         computerKnowledge.unresolvedHits.forEach(hit => {
-            let cells = getPontentialGuessCells(hit[0], hit[1])
+            let cells = getPontentialGuessCells(hit[0], hit[1]);
             potentialCells = potentialCells.concat(cells);
         });
         let cellChoice;
-        
+
         if (computerKnowledge.unresolvedHits.length > 1) {
             let commonRowOrCol = [];
             let rowIdxs = [];
@@ -623,8 +623,8 @@ function computerTurn() {
                     };
                 });
             };
-        }
-        
+        };
+
         if (newChoices.length > 0) {
             potentialCells = newChoices;
         };
@@ -634,13 +634,10 @@ function computerTurn() {
             cellChoice = potentialCells[Math.floor(Math.random() * potentialCells.length)];
         };
         coords = ['p', cellChoice[0], cellChoice[1]];
+
     } else {
-        coords = getRandomGuess();
+        coords = getBetterRandomGuess();
     }
-
-    // get best available location
-
-    // else random
 
     // check if hit or miss
     const isHit = getHitOrMiss(coords);
@@ -667,55 +664,67 @@ function getRandomGuess() {
         };
     };
 }
-
-
+// only called if no unresolved hits to follow-up
+// gets all potential guesses, then eleminates "bad" guesses, until small enough to pick from
 // returns cell for computer's guess
-function getComputerGuess() {
-    let guess;
-    let hits = computerKnowledge.unresolvedHits;
-    let ships = playerShips.filter(item => item.isResolved === false);
-    // picks logically
-    // no hits on unsunk ships, choose (semi)randomly
-    if (hits.length === 0) {
-        while (true) {
-            const row = Math.floor(Math.random() * 10);
-            const col = Math.floor(Math.random() * 10);
-            if (!computerGuesses[row][col]) {
-                return ['p', row, col];
+function getBetterRandomGuess() {
+    let availableCellsOne = [];
+    let availableCellsTwo = [];
+    let guessedCells = [];
+    let adjacendToGuessed = new Set();
+
+    // get all potential cells
+    for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+            if (computerGuesses[i][j] === 0) {
+                availableCellsOne.push([i, j]);
+            } else {
+                guessedCells.push([i, j]);
             };
         };
     };
 
-    // if there is a hit on a floating ship, chose adjacent cell
-    // get most recent hit
-    let prev = hits.slice(-1)[0];
+    // get cells next to guessed cells
+    guessedCells.forEach(cell => {
+        let [row, col] = [...cell]
 
-
-    // this fails when all cells adjacent to last hit are taken. need to then go to another previous hit.
-    while (true) {
-        // if one hit unresolved
-        if (hits.length === 1) {
-            let cell = getGuess(prev[0], prev[1]);
-            if (!computerGuesses[cell[0]][cell[1]]) {
-                return ['p', cell[0], cell[1]];
-            };
-        // if more than one unresolved hit (same as above for now)
-        } else if (hits.length > 1){
-            let cell = getGuess(prev[0], prev[1]);
-            if (!computerGuesses[cell[0]][cell[1]]) {
-                return ['p', cell[0], cell[1]];
-            };
-        } else {
-            break;
+        // get cell above
+        if (row > 0) {
+            adjacendToGuessed.add([row - 1, col]);
         };
-    };
-        // check guesses to see if another hit is adjacent
 
-        // if no adjacent cell is valid, choose previous hit in hits
+        // get cell below
+        if (row < 9) {
+            adjacendToGuessed.add([row + 1, col]);
+        };
 
-        // if there are 2 such hits, guess in same row/col
+        // get cell left
+        if (col > 0) {
+            adjacendToGuessed.add([row, col - 1]);
+        };
 
-        // don't guess in space that a remaining ship could not occupy
+        // get cell right
+        if (col < 9) {
+            adjacendToGuessed.add([row, col + 1]);
+        };
+
+    });
+
+    // remove "worst" guesses
+    availableCellsOne.forEach(cell => {
+        let [row, col] = [...cell];
+        let isAdjacent = [...adjacendToGuessed].some(item => {
+            return item[0] === row && item[1] === col
+        });
+        if (!isAdjacent) {
+            availableCellsTwo.push(cell)
+        };
+    });
+
+    let guessToTry = availableCellsTwo[Math.floor(Math.random() * availableCellsTwo.length)];
+    return ['p', guessToTry[0], guessToTry[1]];
+
+    // if still have guesses left, narrow down further, else get random guess from previous array
 }
 
 // gets cells next to a hit, that haven't been guessed
@@ -745,14 +754,6 @@ function getPontentialGuessCells(row, col) {
         adjacentCells[3] = [row, col + 1];
         adjacentGuesses[3] = computerGuesses[row][col + 1];
     };
-
-    // get number of open cells
-    // let numOfPotentialsGuesses = adjacentGuesses.reduce((acc, curr) => {
-    //     if (curr === 0) {
-    //         return acc + 1;
-    //     }
-    //     return acc;
-    // }, 0);
 
     let cells = [];
     adjacentCells.forEach((cell, i) => {
@@ -1014,16 +1015,5 @@ function changeIsVertical(evt) {
     if (evt.key === ' ') {
         // toggle true/false
         shipToBePlaced.isVertical = !shipToBePlaced.isVertical;
-
-        // remove hover event listener
-        // playerBoardEl.removeEventListener('mouseover', mouseoverPendingPlacement);
-
-        // remove all pending squares
-        // playerCellEls.forEach(cell => cell.classList.remove('pending'));
-
-        // add pending squares to new orientation to display change before moving over another cell
-
-        // re-add event listener to take over on moving cells
-        // playerBoardEl.addEventListener('mouseover', mouseoverPendingPlacement);
     };
 }
