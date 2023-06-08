@@ -112,8 +112,7 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null,
-            potentialCoords: []
+            isResolved: null
         },
         {
             name: 'battleship',
@@ -124,8 +123,7 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null,
-            potentialCoords: []
+            isResolved: null
         },
         {
             name: 'cruiser',
@@ -136,8 +134,7 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null,
-            potentialCoords: []
+            isResolved: null
         },
         {
             name: 'submarine',
@@ -148,8 +145,7 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null,
-            potentialCoords: []
+            isResolved: null
         },
         {
             name: 'destroyer',
@@ -160,8 +156,7 @@ function init() {
             isSunk: false,
             isVertical: false,
             finalHit: null,
-            isResolved: null,
-            potentialCoords: []
+            isResolved: null
         }
     ];
 
@@ -280,6 +275,7 @@ function setShipLocationRandomly(ship, player) {
 
     // randomly set vertical or horizontal
     ship.isVertical = Math.random() < 0.5;
+
     // get locations of current ships
     const currentCoords = [];
     ships.forEach(item => {
@@ -415,9 +411,6 @@ function handlePlacingShip(evt) {
             playerBoard[coord[0]][coord[1]] = 1;
         };
 
-        // reset display message
-        turnEl.innerText = setupMsg;
-
         // render new ship
         renderShip(shipToBePlaced, 'p');
 
@@ -432,7 +425,10 @@ function handlePlacingShip(evt) {
             // move on with game
             setupComputerBoard();
         } else {
-            // or allow for placing other ships
+            // reset display message
+            turnEl.innerText = setupMsg;
+
+            // allow for placing other ships
             playerScoreboardEl.addEventListener('click', getShipToBePlaced);
         };
     };
@@ -467,7 +463,7 @@ function attemptToPlaceShip(ship, row, col) {
         return null;
     };
 
-    let isValid = false;
+    let isValid = true;
     let potential = [];
 
     // get potential coordinates based off of starting position, ship size, and isVertical
@@ -483,8 +479,6 @@ function attemptToPlaceShip(ship, row, col) {
             potential.push([row, col + i]);
         }
     };
-
-    isValid = true;
 
     // compare current positions to potential new ones
     potential.forEach(item => {
@@ -503,17 +497,16 @@ function setupComputerBoard() {
     computerShips.forEach(ship => setShipLocationRandomly(ship, 'c'));
 
     // place computer ships onto computerBoard
-    // this is doing both players, may change since player's will already be done
     placeShipsOntoBoard();
 
     // add ships back to player's scoreboard
     playerShips.forEach(ship => renderScoreboardShip(ship));
 
-    // add event listener to start game
-    computerBoardEl.addEventListener('click', onGuess)
-
     // diplay player's turn
     turnEl.innerText = playerMsg;
+
+    // add event listener to start game
+    computerBoardEl.addEventListener('click', onGuess)
 }
 
 // gets ship coordinates from objects and adds them to the playing board
@@ -552,27 +545,28 @@ function onGuess(evt) {
     const coords = extractCoords(target);
     const [_, cellRow, cellCol] = [...coords];
 
-    // check legal guess (check guesses array not element's classes)
+    // check legal guess
     if (playerGuesses[cellRow][cellCol]) {
         // cell has already been guessed
         return;
     };
-
+    
+    // remove event listener to prepare for win or computer's turn
+    computerBoardEl.removeEventListener('click', onGuess);
+    
     // check if hit or miss
     const isHit = getHitOrMiss(coords);
 
     // handle hit or miss
     isHit ? handleHit(coords) : handleMiss(coords);
 
-    // remove event listener to prepare for win or computer's turn
-    computerBoardEl.removeEventListener('click', onGuess);
-
     // handle win or change turns
     if (winner) {
         renderWinner();
     } else {
         // add setTimeout before computer takes turn, and change display message
-        computerTurn();
+        turnEl.innerText = computerMsg;
+        setTimeout(computerTurn, Math.floor(Math.random() * 500) + 1000);
     };
 }
 
@@ -592,10 +586,8 @@ function computerTurn() {
             let cells = getPontentialGuessCells(hit[0], hit[1]);
             potentialCells = potentialCells.concat(cells);
         });
-        let cellChoice;
 
         if (computerKnowledge.unresolvedHits.length > 1) {
-            let commonRowOrCol = [];
             let rowIdxs = [];
             let colIdxs = [];
             let isRow;
@@ -629,10 +621,8 @@ function computerTurn() {
             potentialCells = newChoices;
         };
 
-        // if nothing else, random guess
-        if (!cellChoice) {
-            cellChoice = potentialCells[Math.floor(Math.random() * potentialCells.length)];
-        };
+        let cellChoice = potentialCells[Math.floor(Math.random() * potentialCells.length)];
+
         coords = ['p', cellChoice[0], cellChoice[1]];
 
     } else {
@@ -650,20 +640,11 @@ function computerTurn() {
         renderWinner();
     } else {
         // change display message
+        turnEl.innerText = playerMsg;
         computerBoardEl.addEventListener('click', onGuess);
     };
 }
 
-// returns random guess, when no hits are known
-function getRandomGuess() {
-    while (true) {
-        const row = Math.floor(Math.random() * 10);
-        const col = Math.floor(Math.random() * 10);
-        if (!computerGuesses[row][col]) {
-            return ['p', row, col];
-        };
-    };
-}
 // only called if no unresolved hits to follow-up
 // gets all potential guesses, then eleminates "bad" guesses, until small enough to pick from
 // returns cell for computer's guess
@@ -673,7 +654,7 @@ function getBetterRandomGuess() {
     let guessedCells = [];
     let adjacendToGuessed = new Set();
 
-    // get all potential cells
+    // get all potential cells and all guessed cells
     for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
             if (computerGuesses[i][j] === 0) {
@@ -707,7 +688,6 @@ function getBetterRandomGuess() {
         if (col < 9) {
             adjacendToGuessed.add([row, col + 1]);
         };
-
     });
 
     // remove "worst" guesses
@@ -727,8 +707,6 @@ function getBetterRandomGuess() {
     // get random guess from remaining available cells
     let guessToTry = remainingCells[Math.floor(Math.random() * remainingCells.length)];
     return ['p', guessToTry[0], guessToTry[1]];
-
-    // if still have guesses left, narrow down further, else get random guess from previous array
 }
 
 // gets cells next to a hit, that haven't been guessed
@@ -817,11 +795,8 @@ function handleHit(coords) {
     const [board, row, col] = [...coords];
 
     // update playerGuesses or computerGuesses
-    if (board === 'p') {
-        computerGuesses[row][col] = 1;
-    } else {
-        playerGuesses[row][col] = 1;
-    };
+    const guesses = (board === 'p') ? computerGuesses: playerGuesses;
+    guesses[row][col] = 1;
 
     // get ship that was hit
     const [ship, idx] = getShipAtCoord(coords);
@@ -841,13 +816,9 @@ function handleHit(coords) {
         updateKnowledge(ship, row, col);
     };
 
-    // if ship sinks, renderScoreboardSunk()
+    // if ship sinks, renderScoreboardSunk(), and checkWinner(), then set winner to 1, -1, or null
     if (ship.isSunk) {
         renderScoreboardSunk(ship, board);
-    };
-
-    // if ship sinks, checkWinner(), then set winner to 1, -1, or null
-    if (ship.isSunk) {
         winner = checkWinner(board);
     };
 }

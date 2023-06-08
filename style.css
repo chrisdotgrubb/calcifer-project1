@@ -1,11 +1,14 @@
 * {
     box-sizing: border-box;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 body {
     background-color: #dcdcdc;
     font-family: 'Roboto', sans-serif;
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
 }
 
 main {
@@ -101,6 +104,7 @@ nav > * {
 #turn {
     font-weight: bold;
     text-decoration: underline;
+    width: 20vmin;
 }
 
 #game {
