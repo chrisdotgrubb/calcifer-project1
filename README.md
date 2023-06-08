@@ -3,7 +3,7 @@
 ## Battleship is a two player game, where you try to sink your opponent's ships before losing all of yours.
 
 ### **Getting started**
-[Click here to play!]()
+[Click here to play!](https://chrisdotgrubb.github.io/calcifer-project1/)
 
 Each player places their ships on their playing board.
 The ships must be completely on the 10x10 grid, without overlapping.
@@ -44,4 +44,4 @@ Playing the game
 <br />
 
 ### **Technical details**
-This project was built by Chris Grubb in 2023 using HTML, CSS, and Javascript. It is meant to be played in a browser.
+This project was built by Chris Grubb in 2023 using HTML, CSS, and Javascript. It is meant to be played in a browser. It is mainly to highlight computer logic, but it would benefit from better support for small screens, improved graphics, and possibly some animations.
