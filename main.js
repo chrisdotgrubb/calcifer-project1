@@ -23,6 +23,7 @@ let playerShips;
 let computerShips;
 
 let shipToBePlaced;
+let hoverTarget;
 let computerKnowledge;
 
 /*--- cached elements ---*/
@@ -1041,7 +1042,7 @@ function renderWinner() {
     // display play again button
     playAgainEl.classList.remove('hidden');
 }
-let hoverTarget;
+
 // renders potential ship location on hover of ship placement
 // (mouseover event)
 function mouseoverPendingPlacement(evt) {
