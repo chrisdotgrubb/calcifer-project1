@@ -35,7 +35,7 @@ Placing ships
 <br />
 <br />
 
-![Playing](https://i.imgur.com/1qnfHYR.png)
+![Playing](https://i.imgur.com/CKtOUPs.png)
 Playing the game
 
 
