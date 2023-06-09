@@ -421,6 +421,8 @@ function handlePlacingShip(evt) {
         // remove rotate ability
         window.removeEventListener('keydown', changeIsVertical);
 
+        hoverTarget = null;
+
         // check if all ships have been placed
         if (playerShips.every(ship => ship.coords.length > 0)) {
             // move on with game
@@ -1090,7 +1092,7 @@ function mouseoutPendingPlacement(evt) {
 // toggles vertical and horizontal placement of new ship
 // (keydown event)
 function changeIsVertical(evt) {
-    if (evt.key === ' ') {
+    if (evt.key === ' ' && hoverTarget) {
         // toggle true/false
         shipToBePlaced.isVertical = !shipToBePlaced.isVertical;
 
