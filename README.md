@@ -1,6 +1,6 @@
 # **Battleship**
 
-## Battleship is a two player game, where you try to sink your opponent's ships before losing all of yours.
+## Battleship is a two-player game, where you try to sink your opponent's ships before losing all of yours.
 
 ### **Getting started**
 [Click here to play!](https://chrisdotgrubb.github.io/calcifer-project1/)
